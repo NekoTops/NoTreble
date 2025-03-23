@@ -1,4 +1,4 @@
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { app } from "../../firebaseConfig";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
@@ -93,6 +93,16 @@ const getUserProfile = async (uid) => {
   } catch (error) {
     console.error("Error fetching user profile:", error.message);
     throw error;
+  }
+};
+
+//Send Password Reset Email
+export const sendResetEmail = async (email) => {
+  try {
+    await sendPasswordResetEmail(getAuth(), email);
+    return { success: true, message: "Password reset email sent! Check your inbox." };
+  } catch (error) {
+    return { success: false, message: error.message };
   }
 };
 
