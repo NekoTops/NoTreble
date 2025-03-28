@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation'
 
 export const HotKeyProvider = () => {
     const router = useRouter();
-    useHotkeys('ctrl+[', () => { router.push("/") })
-    useHotkeys('ctrl+]', () => { router.push("/Lessons") })
-    useHotkeys('ctrl+;', () => { router.push("/SheetMusicTools") })
-    useHotkeys("ctrl+'", () => { router.push("/Community") })
+    useHotkeys('ctrl+arrowup', () => { router.push("/") })
+    useHotkeys('ctrl+arrowdown', () => { router.push("/Lessons") })
+    useHotkeys('ctrl+arrowleft', () => { router.push("/SheetMusicTools") })
+    useHotkeys("ctrl+arrowright", () => { router.push("/Community") })
     return (
         <>
         </>

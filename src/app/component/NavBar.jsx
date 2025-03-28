@@ -4,7 +4,7 @@ import NavLink from "./NavLink";
 import Image from "next/image";
 import "../cs/NavBar.css"
 import { useEffect, useState } from "react";
-import {onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { getUserProfile } from "@/lib/firebase/auth";
 import { auth } from "@/firebaseConfig";
 
@@ -33,6 +33,7 @@ function NavBar() {
     });
     return () => unsubscribe();
   }, []);
+  
   return (<nav className="nav-bar">
     <div className=" overdiv flex flex-row  items-center ">
       <Image aria-hidden src="/logo.png" alt="No Treble icon" width={80} height={80}  className="self-center navLogo"/>

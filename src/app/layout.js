@@ -5,6 +5,8 @@ import "./globals.css";
 import { Route, Routes } from "react-router-dom";
 import NavBar from "./component/NavBar";
 import HotKeyProvider from "./component/Hotkeys";
+import TTSBar from "./component/TTSBar";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -38,6 +40,8 @@ export default function RootLayout({ children }) {
       >
         <Header/>
         <HotKeyProvider/>
+        <TTSBar/>
+        
         {children}
       </body>
     </html>

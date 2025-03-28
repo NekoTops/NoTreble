@@ -7,6 +7,8 @@ import { onAuthStateChanged } from "firebase/auth"; // checks if user is logged 
 import { doc, getDoc } from "firebase/firestore";
 import Popup from "../component/Popup";
 
+
+
 export default function Community() {
     const [postContent, setPostContent] = useState("");
     const [posts, setPosts] = useState([]); // Store post

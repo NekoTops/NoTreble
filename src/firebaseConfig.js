@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
+import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAds3-SpXxNlcGB7wKZXi9jnzwhmUe57iw",
@@ -18,9 +19,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+const realtimeDB = getDatabase(app);
+
 let analytics;
 if (typeof window !== "undefined") {
   analytics = getAnalytics(app);
 }
 
-export { app, db, auth, analytics }; 
+export { app, db, auth, analytics, realtimeDB }; 
