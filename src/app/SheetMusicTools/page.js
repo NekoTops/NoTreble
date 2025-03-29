@@ -33,10 +33,34 @@ export default function SheetMusicTools() {
         
         // Generate preview URL for images/PDFs
         if (selectedFile) {
-            setPreview(URL.createObjectURL(selectedFile)); 
+            setPreview(URL.createObjectURL(selectedFile));
         } else {
             setPreview(null); // Clear preview if no file is selected
         }
+    }
+
+    const uploadFile = async () => {
+        if (!file) {
+            alert("Please select a file to upload.");
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append("file", file); // Append file to formData
+        
+            try {
+              const response = await fetch("/api/savefile", {
+                method: "POST",
+                body: formData,
+              });
+        
+              const data = await response.json();
+              setMessage(data.message || "Upload successful!");
+            } catch (error) {
+              setMessage("Upload failed. Try again.");
+              console.error(error);
+            }
+        
     }
 
     return (
@@ -126,6 +150,17 @@ export default function SheetMusicTools() {
                     src="null" 
                     alt="Generated or Placeholder" 
                     />
+                </div>
+                {/* Save Button to Upload the File */}
+                <div className="mt-5">
+                    <button
+                        type="button"
+                        onClick={uploadFile}
+                        disabled = {!file}
+                        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                    >
+                        Save Music File
+                    </button>
                 </div>
             </div>
         </main>

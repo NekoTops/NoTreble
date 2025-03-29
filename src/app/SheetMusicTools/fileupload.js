@@ -1,5 +1,5 @@
 import React from "react";
-
+                                        //setFile is var to use elsewhere via import
 export default function FileUploader({ setFile }) {
     function handleFileChange(e) {
         const selectedFile = e.target.files?.[0];
@@ -14,8 +14,8 @@ export default function FileUploader({ setFile }) {
 
         setFile(selectedFile); // Send file to parent component
     }
-
-    return (
+    
+  return (
         <div>
             <input
                 type="file"
@@ -27,7 +27,8 @@ export default function FileUploader({ setFile }) {
             <button  className="w-150 mt-4 px-3 py-2 md:text-4xl text-lg border-2 border-black bg-white text-black rounded hover:bg-gray-400 duration-300"
             onClick={() => document.getElementById("fileInput").click()}>
                     Upload Image or PDF
-            </button>
+            </button> 
         </div>
     );
 }
+

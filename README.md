@@ -14,6 +14,11 @@ Second, Install React Icon Library,
 npm install react-icons --save
 ```
 
+Third, Intstall Multer,
+```bash
+npm install multer 
+```
+
 Then, run the development server:
 ```bash
 npm run dev
