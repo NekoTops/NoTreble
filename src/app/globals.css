@@ -140,4 +140,19 @@ body {
   font-weight: 500;
   padding-bottom: 4px;
 }
+/*Lessons*/
+.lesson-div{
+  font-size: (--body-text-size);
+  font-family: "Geist Sans", sans-serif;
+  background-color: var(--background);
 
+
+}
+.lesson-div > h3{
+  font-family: "Geist Sans";
+  font-size: var(--h3-text-size);
+  padding-top: 5px;
+  padding-bottom: 4px;
+  padding-left: 40px
+  
+}

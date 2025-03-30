@@ -1,4 +1,4 @@
-// src/app/Lessons/Textbook/page.js
+// this page is connected to a link in the real time database 
 "use client" 
 import { useEffect, useState } from "react";
 import { ref, get } from "firebase/database";
