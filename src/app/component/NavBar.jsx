@@ -6,7 +6,7 @@ import "../cs/NavBar.css"
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { getUserProfile } from "@/lib/firebase/auth";
-import { auth } from "@/firebaseConfig";
+import { auth } from "../../firebaseConfig";
 
 function NavBar() {
   const [target, setTarget] = useState("/Login");

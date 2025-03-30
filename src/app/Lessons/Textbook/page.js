@@ -2,7 +2,7 @@
 "use client" 
 import { useEffect, useState } from "react";
 import { ref, get } from "firebase/database";
-import { realtimeDB } from "@/firebaseConfig"; // Make sure you've set up Firebase in your project
+import { realtimeDB } from "../../../firebaseConfig"; // Make sure you've set up Firebase in your project
 import { useSearchParams } from "next/navigation";
 
 

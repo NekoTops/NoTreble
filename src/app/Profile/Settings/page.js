@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { auth } from "@/firebaseConfig";
+import { auth } from "../../../firebaseConfig";
 import { getUserProfile, updateUserProfile } from "@/lib/firebase/auth";
 import { useRouter } from "next/navigation";
 import { signOut, onAuthStateChanged, updateEmail, updatePassword } from "firebase/auth";

@@ -7,8 +7,9 @@ import { getDatabase } from "firebase/database";
 const firebaseConfig = {
   apiKey: "AIzaSyAds3-SpXxNlcGB7wKZXi9jnzwhmUe57iw",
   authDomain: "notreble-d1c57.firebaseapp.com",
+  databaseURL: "https://notreble-d1c57-default-rtdb.firebaseio.com",
   projectId: "notreble-d1c57",
-  storageBucket: "notreble-d1c57.appspot.com", 
+  storageBucket: "notreble-d1c57.firebasestorage.app",
   messagingSenderId: "997398023135",
   appId: "1:997398023135:web:21e93c51c157812601126a",
   measurementId: "G-P5W4E6S61T"

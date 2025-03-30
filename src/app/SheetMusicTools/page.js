@@ -1,11 +1,11 @@
 "use client";
 import React, { useState } from "react";
+import Link from "next/link";
 import FileUploader from "./fileupload";
 
 export default function SheetMusicTools() {
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
- 
     //Music sheet starts out with 4 properties
     const [sheet, setSheet]=useState({
         title: "",
@@ -26,7 +26,8 @@ export default function SheetMusicTools() {
     //Prevent resetting the page to default after every input
     const handleSubmit = (event) => {
         event.preventDefault();
-    };
+      };
+
 
     function handleFileChange(selectedFile) {
         setFile(selectedFile);
@@ -49,9 +50,12 @@ export default function SheetMusicTools() {
                     
                     {/* Left Section: File Upload + Info */}
                     <div className="md:w-1/2 flex flex-col justify-between p-4">
-                        <FileUploader setFile={handleFileChange} />
+                    <FileUploader setFile={handleFileChange} />
 
                         {/* Info Section (Anchored to Bottom) */}
+                        <Link href = "/musiclibrary">
+                        <button className="px-4 py-2 bg-blue-500 text-white rounded">Go to Music Library</button>
+                        </Link>
                         <div className="mt-auto text-left md:text-4xl text-lg">
                             <p className="pb-3">Piece Title: </p>
                             <p className="pb-3">Key: </p>

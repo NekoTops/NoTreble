@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { db } from "@/firebaseConfig"; 
-import { auth } from "@/firebaseConfig";
+import { db } from "../../firebaseConfig"; 
+import { auth } from "../../firebaseConfig";
 import { collection, addDoc, getDocs, serverTimestamp } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth"; // checks if user is logged in (to determine if they can post or nahhh :P)
 import { doc, getDoc } from "firebase/firestore";
