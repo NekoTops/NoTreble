@@ -71,11 +71,11 @@ export default function Beams(){
 
                 <p>In this example, the eighth notes are not grouped with beams, making it difficult to interpret the triple meter. </p>
 
-                <a href="/LessonImages/withoutbeams.png"><img src="/LessonImages/withoutbeams.png" width="70%"/></a>
+                <a href="/LessonImages/withoutbeams.png"><img src="/LessonImages/withoutbeams.png" alt=' Image shows a line-up of notes, that include eighth notes not being grouped together for easier interpretation of the triple meter.' width="70%"/></a>
 
                 <p>If we re-notate the above example so that the notes that fall within the same beat are grouped together with a beam, it makes the music much easier to read. </p>
 
-                <a href="/LessonImages/beams.png"><img src="/LessonImages/beams.png" width="70%"/></a>
+                <a href="/LessonImages/beams.png"><img src="/LessonImages/beams.png" alt='Image shows the same notes as above, but has the notes that fall within the same beat grouped together with a beam' width="70%"/></a>
 
                 <h3>Borrowed divisions </h3>
 
@@ -83,11 +83,11 @@ export default function Beams(){
 
                 <p><em>Triplets</em> are borrowed from compound meter, and may occur at both the beat division and subdivision levels, as seen below.</p>
 
-                <a href="/LessonImages/triplets.png"><img src ="/LessonImages/triplets.png" width="70%"/></a>
+                <a href="/LessonImages/triplets.png"><img src ="/LessonImages/triplets.png" alt='This image illustrates triplet eighth notes alongisde standard eighth notes and triplet sixteenth notes. ' width="70%"/></a>
 
                 <p>Likewise, <em>duplets</em> can be imported from simple meter into a compound meter.</p>
 
-                <a href="/LessonImages/duplets.png"><img src="/LessonImages/duplets.png" width="70%"/></a>
+                <a href="/LessonImages/duplets.png"><img src="/LessonImages/duplets.png" alt='This image illustrates eighth notes, duplet eighth notes, and duplet sixteenth notes.' width="70%"/></a>
                 <Quizviewer quizzes={quizzes}/>
             </div>
         </main>

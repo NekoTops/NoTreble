@@ -7,6 +7,10 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useTTS } from "../context/TTSContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Midi } from "@tonejs/midi";
+import * as Tone from "tone";
+import { GiSaveArrow } from "react-icons/gi";
+
 
 export default function SheetMusicTools() {
   const router = useRouter();
@@ -109,10 +113,12 @@ export default function SheetMusicTools() {
       <div className="m-20">
         <h1 className="font-bold mb-7 text-4xl">Sheet Music Converter</h1>
 
-        <div className="w-auto h-auto bg-gray-200 rounded-2xl text-body p-4 pl-7 flex flex-col md:flex-row border-2 border-gray-400">
-          <div className="md:w-1/2 flex flex-col justify-between p-4">
-            <FileUploader setFile={handleFileChange} />
-          </div>
+  <div className="w-auto h-auto bg-gray-200 rounded-2xl text-body p-4 pl-7 flex flex-col md:flex-row border-2 border-gray-400">
+    <div className="md:w-1/2 flex flex-col justify-between p-4">
+      <FileUploader setFile={handleFileChange} />
+
+
+    </div>
 
           <div className="w-1/2 p-4">
             {preview ? (
@@ -133,20 +139,29 @@ export default function SheetMusicTools() {
               <span className="text-gray-500">No file uploaded</span>
             )}
           </div>
+          {uploadStatus && <p className="mt-2 text-body">{uploadStatus}</p>}
+
         </div>
 
-        <div className="mt-4">
-          <button onClick={handleUpload} disabled={uploading}>
-            {uploading ? "Saving..." : "Save File"}
-          </button>
-        </div>
+        <div >
+        <button className="text-center text-body  font-bold hover:bg-[#102437] bg-[#455090] text-white px-8 py-4 rounded-md mb-6 shadow-lg ml-80 float-right inline-flex gap-4" 
+        onClick={handleUpload} disabled={uploading}>
+      {uploading ? "Saving..." : "Save File"} <GiSaveArrow className="text-gray-800 text-4xl" />
+      </button>
 
-        {uploadStatus && <p className="mt-2">{uploadStatus}</p>}
+        <Link href="SheetMusicTools/MusicLibrary">
+      <button className="text-center text-body font-bold hover:bg-[#102437] bg-[#455090] text-white px-4 py-4 rounded-md mb-4 shadow-lg">
+      Go to Music Library 🎵 
+      </button>
+    </Link>
 
-        <Link href="/SheetMusicTools/MusicLibrary">
-          <button className="mt-6">🎵 Go to Music Library</button>
-        </Link>
       </div>
+  <div >
+  
+  
+  
+  </div>
+</div>
 
       <div className="ml-20 mr-20 mb-20">
         <h1 className="font-bold mb-7 text-4xl">Sheet Music Composer</h1>
