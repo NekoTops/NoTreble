@@ -68,6 +68,7 @@ export default function TTSBar() {
     setShowOptions(prev => !prev);
   };
 
+  // Get the first 3 voices from the available voices list
   const filteredVoices = voices.slice(0, 3);
 
   const handleVoiceChange = (e) => {
@@ -77,11 +78,10 @@ export default function TTSBar() {
     setVoice(selectedVoice); // Update the voice in the TTS context
   };
 
-  // Get the first 3 voices from the available voices list
-
   return (
     <div
-      className="ttsBar"
+      data-ignore-tt
+      className="ttsBar" 
       style={{ position: "fixed", bottom: "10px", right: "60px", zIndex: 1000 }}
     >
       <div style={{ position: "relative" }} ref={menuRef}>

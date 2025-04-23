@@ -96,44 +96,91 @@ export const TTSProvider = ({ children }) => {
     return bodyClone.innerText.trim();
   };
   
-
+  const wrapWordsInSpans = () => {
+    const container = document.getElementById("tts-wrapper");
+    if (!container) return;
+  
+    const ignoredTags = ['SCRIPT', 'STYLE'];
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+    
+    let node;
+    let wordIndex = 0;
+  
+    while ((node = walker.nextNode())) {
+      const parent = node.parentNode;
+  
+      if (!ignoredTags.includes(parent.nodeName) && node.textContent.trim()) {
+        const words = node.textContent.trim().split(/\s+/);
+        const fragment = document.createDocumentFragment();
+  
+        words.forEach((word) => {
+          const span = document.createElement("span");
+          span.className = "tts-word";
+          span.setAttribute("data-index", wordIndex++);
+          span.textContent = word + " ";
+          fragment.appendChild(span);
+        });
+  
+        parent.replaceChild(fragment, node);
+      }
+    }
+  };
+  
   const speakPageContent = (startIndex = 0, content = getPageText(), element = null) => {
     if (!utterance) return;
   
+    // Remove previous word spans if any
+    document.querySelectorAll('.tts-word').forEach(span => {
+      const textNode = document.createTextNode(span.textContent);
+      span.parentNode.replaceChild(textNode, span);
+    });
+  
+    wrapWordsInSpans();
+  
+    let lastHighlight = null;
     const text = content;
     if (!text) return;
-    console.log("Text TTS will read:\n", content);
-
-    const words = text.split(/\s+/); // Split text into an array of words
-    const resumedText = words.slice(startIndex).join(" "); // Resume exactly where it left off
   
-    window.speechSynthesis.cancel(); // Stop previous speech
+    const words = text.split(/\s+/);
+    const resumedText = words.slice(startIndex).join(" ");
+  
+    window.speechSynthesis.cancel();
   
     utterance.rate = rate;
     utterance.voice = voice;
-    utterance.text = resumedText; // Only contains the remaining words
-    let spokenWordCount = startIndex; // Track spoken words
+    utterance.text = resumedText;
+  
+    const allWords = Array.from(document.querySelectorAll(".tts-word"));
   
     utterance.onboundary = (event) => {
       if (event.name === "word") {
-        const spokenWords = resumedText.slice(0, event.charIndex).split(/\s+/).length; // Count the words spoken so far
-        spokenWordCount = startIndex + spokenWords;
-        
-        setCurrentIndex(spokenWordCount - 1); // Set the index to be one less because it keeps skipping a word in between
+        const allWords = Array.from(document.querySelectorAll(".tts-word"));
+        let charCounter = 0;
+    
+        for (let i = 0; i < allWords.length; i++) {
+          const word = allWords[i].textContent || '';
+          charCounter += word.length;
+          if (charCounter >= event.charIndex) {
+            if (lastHighlight) lastHighlight.classList.remove("tts-highlight");
+            allWords[i].classList.add("tts-highlight");
+            lastHighlight = allWords[i];
+            setCurrentIndex(i);
+            break;
+          }
+        }
       }
     };
   
-    window.speechSynthesis.speak(utterance);   // Start speaking
+    window.speechSynthesis.speak(utterance);
     setIsSpeaking(true);
   
     utterance.onend = () => {
-      if (element) {
-        element.classList.remove("tts-highlight");
-      }
-      setIsSpeaking(false);   // Reset state when done
-      setCurrentIndex(null);    // Reset so future play starts from the beginning
+      if (element) element.classList.remove("tts-highlight");
+      setIsSpeaking(false);
+      setCurrentIndex(null);
     };
   };
+  
   
 
   // Speak function for quick content
