@@ -9,13 +9,14 @@ import "../../cs/MusicLibrary.css"
 
 
 export default function Library() {
+  
     const [files, setFiles] = useState([]);
     const [uid, setUid] = useState('');
     const router = useRouter();
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                console.alert("Please log in to use this feature");
+                alert("Please log in to use this feature");
                 router.push("/Login");
                 return;
             }
@@ -23,7 +24,7 @@ export default function Library() {
                 try {
                     const response = await fetch(`/api/listfiles/${user.uid}`);
                     const data = await response.json();
-                    setFiles(data.files);
+                    setFiles(Array.isArray(data.files) ? data.files : []);
                 } catch (error) {
                     console.error('Error fetching file list:', error);
                 }
@@ -42,13 +43,14 @@ export default function Library() {
 
 
       const [searchTerm, setSearchTerm] = useState("");
-      const filteredFiles = files.filter((file) =>
-      file.toLowerCase().includes(searchTerm.toLowerCase())
-);
+      const filteredFiles = (files || []).filter((file) =>
+        file.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
   return (
 
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-300  ">
-      <Link href="/SheetMusicTools" className="flex w-fit items-center bg-black text-white text-body ml-20 mt-10 px-4 py-2 rounded-lg hover:bg-white hover:text-black hover:border-2 hover:border-black">
+    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-gray-200 ">
+      <Link href="/SheetMusicTools" className="flex w-fit items-center bg-black text-white text-body ml-20 px-4 py-2 rounded-lg hover:bg-white hover:text-black hover:border-2 hover:border-black">
         <TfiControlBackward className="w-1/4 h-1/4 mr-2 flex-shrink-0" /> 
         Back 
       </Link>
@@ -72,7 +74,7 @@ export default function Library() {
           {pieceArray(filteredFiles, 3).map((row, rowIndex) => (
             <tr key={rowIndex}>
               {row.map((file) => (
-                <td className="musiclibrarydata hover:scale-105 font-bold hover:underline" key={file}>
+                <td className="musiclibrarydata hover:scale-110 font-bold hover:underline shadow-lg py-12" key={file}>
                 <div className="flex flex-col items-center">
                   
                   <a href={`/SheetMusicTools/MusicLibrary/MusicListener/${uid}/${file}`}>
