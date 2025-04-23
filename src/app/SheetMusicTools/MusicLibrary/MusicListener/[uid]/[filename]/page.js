@@ -8,6 +8,8 @@ import * as Tone from "tone";
 import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
+import { TfiControlBackward } from "react-icons/tfi";
+import { GiMusicalNotes } from "react-icons/gi";
 
 export default function MusicPlayer({ params }) {
   const router = useRouter();
@@ -117,11 +119,14 @@ export default function MusicPlayer({ params }) {
 
   return (
     <div>
-      <h1>🎼 Listening to: {filename}</h1>
-      <Link href="/SheetMusicTools/MusicLibrary">
-        <button>⬅️ Back to Library</button>
+      <Link href="/SheetMusicTools/MusicLibrary" className="flex w-fit items-center bg-black text-white text-body ml-20 mt-10 px-4 py-2 rounded-lg hover:bg-white hover:text-black hover:border-2 hover:border-black">
+        <TfiControlBackward className="w-1/4 h-1/4 mr-2 flex-shrink-0" /> 
+        Back 
       </Link>
 
+      <div className="text-body ml-6 inline-flex gap-4 text-center px-8 py-4 ">
+      <h3 className="inline flex gap-4 text-center"> <GiMusicalNotes /> Listening to: {filename} <GiMusicalNotes /></h3>
+      </div>
       <div
         ref={osmdContainerRef}
         id="osmdContainer"

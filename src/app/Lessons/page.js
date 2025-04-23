@@ -9,7 +9,7 @@ import LessonHeader from "../component/LessonHeader";
 export default function Lessons() { 
 
     const Columns = () => 
-    <div className="grand_lessons_div grid grid-cols-3 mt-4">
+    <div className="grand_lessons_div grid grid-cols-3 mt-2">
         <div>
             <LessonHeader lesson = "Scales"></LessonHeader>
             <LevelButton level = {1} address ="/Lessons/Key/Lesson1-Pitches" ></LevelButton>

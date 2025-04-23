@@ -141,7 +141,7 @@ export default function Intervals(){
 
                 <p>Again, take C4–E4 (major third) and E4–C5 (minor sixth). These two dyads have the same two pitch classes, but one has C on bottom and E on top, while the other has E on bottom and C on top. Thus, they are inversions of each other.</p>
 
-                <img src={'/LessonImages/inversion.png'} alt="Inversion relationship: major third and minor sixth." style={{ }}/>
+                <a href="/LessonImages/inversion.png"><img src={'/LessonImages/inversion.png'} alt="Inversion relationship: major third and minor sixth." style={{ }}/></a>
 
                 <p>Three relationships exhibited by these two dyads hold for all interval inversions. </p>
 
@@ -161,7 +161,7 @@ export default function Intervals(){
 
                 <p>There are several methods for learning intervals. Choose your favorite:</p>
 
-                <p>- <a href ="whiteKeyMethod.html">The white-key method</a></p>
+                <p>-The white-key method</p>
 
 
 

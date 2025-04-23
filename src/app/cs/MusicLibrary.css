@@ -1,0 +1,14 @@
+.musiclibrary {
+    justify-content: space-evenly;
+    font: bold;
+}
+
+.musiclibrarydata {
+    padding-top: 5% ;
+    font-style: bold;
+}
+
+/* w-3/4 h-fit bg-gray-100 
+flex flex-col 
+mx-auto mt-20 mb-20 rounded-xl 
+border-2 border-black-100 drop-shadow-md */
