@@ -1,0 +1,37 @@
+name: Run Cypress Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    environment: PROD
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build Next.js app
+      run: npm run build
+
+    - name: Start Next.js app
+      run: |
+        npm start &  # Start the app in the background
+        sleep 10     # Give the app time to boot up
+
+    - name: Run Cypress tests
+      env:
+        TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+        TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      run: npx cypress run --browser chrome

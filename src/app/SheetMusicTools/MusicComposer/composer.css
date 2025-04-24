@@ -1,0 +1,15 @@
+.note-playing {
+  stroke: #3b82f6 !important;
+  fill: #3b82f6 !important;
+  transition: all 0.1s ease-in-out;
+}
+
+#note-box {
+  position: absolute;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  pointer-events: none;
+  display: none;
+  z-index: 9999;
+  transition: top 0.1s, left 0.1s, width 0.1s, height 0.1s;
+}

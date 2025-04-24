@@ -14,10 +14,23 @@ export const TTSProvider = ({ children }) => {
   const [rate, setRate] = useState(1);
   const [voice, setVoice] = useState();
   const [voices, setVoices] = useState();
-  const [clickTTS, setClickTTS] = useState(true);
   const pathname = usePathname(); // Gets the current page route
   const db = getFirestore();
   const lastAnnouncementRef = useRef("");
+
+  const [clickTTS, setClickTTS] = useState(() => {
+    if (typeof window !== "undefined") {
+      const storedClickTTS = localStorage.getItem("clickTTS");
+      return storedClickTTS ? JSON.parse(storedClickTTS) : true;  // Default to true if not set
+    }
+    return true;  // Default value if running in server-side environment
+  });
+
+  useEffect(() => {
+    // Save the `clickTTS` value to localStorage whenever it changes
+    localStorage.setItem("clickTTS", JSON.stringify(clickTTS));
+  }, [clickTTS]);
+
   useEffect(() => {
     if (voice) {
       saveTTSSettings(rate, voice);
@@ -84,7 +97,7 @@ export const TTSProvider = ({ children }) => {
   };
   
 
-  const speakPageContent = (startIndex = 0, content = getPageText()) => {
+  const speakPageContent = (startIndex = 0, content = getPageText(), element = null) => {
     if (!utterance) return;
   
     const text = content;
@@ -114,6 +127,9 @@ export const TTSProvider = ({ children }) => {
     setIsSpeaking(true);
   
     utterance.onend = () => {
+      if (element) {
+        element.classList.remove("tts-highlight");
+      }
       setIsSpeaking(false);   // Reset state when done
       setCurrentIndex(null);    // Reset so future play starts from the beginning
     };
@@ -148,34 +164,39 @@ export const TTSProvider = ({ children }) => {
   };
 
   const handleClick = (event) => {
-    const target = event.target;
+    const element = event.target;
     let content = "";
   
     window.speechSynthesis.pause();
 
+    // Clear previous highlights
+    document.querySelectorAll(".tts-highlight").forEach(el => el.classList.remove("tts-highlight"));
+
+    // Add highlight to the current clicked element
+    element.classList.add("tts-highlight");
+
     // When clicking the speaker icon, it should read "TTS Menu" instead of the whole page
-    if (event.target.closest('[data-ignore-tts]')) {
+    if (element.closest('[data-ignore-tts]')) {
       if (isSpeaking) return;
       stopSpeaking();
       speakText("TTS Menu");
       return;
     }
 
-    // Take in the alt texts if an element is an image
-    if (target.tagName === "INPUT" || target.tagName === "LABEL") {
-      content = target.value?.trim();   // Read the input's value
-    }
-    else if (target.tagName === "IMG") {
-      content = target.alt?.trim();     // Read the alt text of images
+    // Determine what to read for input, label and images
+    if (["INPUT", "LABEL", "TEXTAREA"].includes(element.tagName)) {
+      content = element.value?.trim() || element.getAttribute("placeholder")?.trim() || element.getAttribute("name")?.trim();
+    } else if (element.tagName === "IMG") {
+      content = element.alt?.trim();
     } else {
-      content = target.innerText?.trim();
+      content = element.innerText?.trim();
     }
 
-    console.log('Clicked element:', event.target);
+    console.log('Clicked element:', element);
     // on click read
     console.log("I herd a clickkk");
 
-    speakPageContent(0, content); // Read current paragraph
+    speakPageContent(0, content, element); // Read current paragraph
   };
 
   // TEST FIXME: need to unmount the event listener when the pathname changes
@@ -183,9 +204,14 @@ export const TTSProvider = ({ children }) => {
   useEffect(() => {
     if (!pathname) return;
 
-    const pageName = pathname === "/"
-    ? "Home"    // If the route is just /, we label it "Home"
-    : pathname.replace("/","").replace(/([A-Z])/g, " $1");  // Add a space before any capital letters
+    // Split the path name into segments and only pick the last segment to announce it
+    const segments = pathname.split("/").filter(Boolean);
+    const lastSegment = segments[segments.length-1] || "Home";
+
+    const pageName = lastSegment
+      .replace(/([A-Z])/g, " $1")
+      .replace(/-/g, " ")
+      .trim();
 
     const announcement = `You are on the ${pageName} page`;
     // Only speak if the announcement changed
@@ -195,7 +221,7 @@ export const TTSProvider = ({ children }) => {
     }
     
     if (!clickTTS) return;  // Unactive this when user choose to turn off this feature
-    const elements = document.querySelectorAll('p, h1, h2, h3, span, img, button, input, label'); // Select all <p> elements
+    const elements = document.querySelectorAll('p, h1, h2, h3, span, img, button, input, textarea, label');
     elements.forEach(element => {
       element.addEventListener('click', handleClick);
     });
@@ -258,7 +284,6 @@ export const TTSProvider = ({ children }) => {
   }, [voices]);
 
 
-// END TEST
   return (
     <TTSContext.Provider value={{ getPageText, speakPageContent, resumeSpeaking, stopSpeaking, isSpeaking, currentIndex,
        rate, setRate, voice, setVoice, voices, setVoices, speakText, clickTTS, setClickTTS }}>

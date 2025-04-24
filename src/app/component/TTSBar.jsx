@@ -93,7 +93,7 @@ export default function TTSBar() {
             handleExpand();
           }}
         >
-          <HiMiniSpeakerWave size={40} />
+          <HiMiniSpeakerWave size={50} className="hover:scale-125" />
         </button>
 
         {/* Dropdown Options */}

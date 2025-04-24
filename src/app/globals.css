@@ -12,6 +12,7 @@
   --body-text-size: 30px; 
   --h2-text-size: 60px;
   --h3-text-size: 40px;
+  --line-space: normal;
 
 }
 
@@ -20,6 +21,7 @@
   --h2-text-size: 100px;
   --h3-text-size: 65px;
   --h4-text-size: 58px;
+  --line-space: 75px;
 }
 
 /* update */
@@ -62,6 +64,7 @@ body {
 }
 p, h2, h3, h4 {
   text-wrap: pretty;
+  line-height: var(--line-space);
 }
 .prefColor { /* Do not use this class purely for color prefs*/
   background-color: #ffffff; /* background color used in demo */
@@ -288,7 +291,8 @@ p, h2, h3, h4 {
   text-align: center;
   &:hover {
     @media (hover: hover) {
-      background-color: #102437;
+      color:#ededed;
+      background-color: #455090;
     }
   }
 }
@@ -416,4 +420,10 @@ p, h2, h3, h4 {
     font-family: var(--font-geist-sans), var(--font-geist-mono), sans-serif;
   }
 
+}
+
+.tts-highlight {
+  outline: 2px solid #ffda48;
+  background-color: #ffea48;
+  transition: background-color 0.3s ease;
 }

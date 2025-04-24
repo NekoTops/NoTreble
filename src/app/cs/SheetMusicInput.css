@@ -82,3 +82,18 @@
         width:1000px;
         font-size: xx-large;
     }}
+
+    .SMinput {
+        width: 100%;
+        padding: 0.5rem 1rem; 
+        margin-top: 0.5rem;
+        margin-left: 0rem;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+      
+      @media (min-width: 640px) {
+        .SMinput {
+          max-width: 100%;
+        }
+      }

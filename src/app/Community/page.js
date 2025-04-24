@@ -398,7 +398,7 @@ const removeTag = (tagToRemove) => {
                   alt="Profile"
                   className="w-10 h-10 rounded-full mr-4"
                 />
-                <div className="flex-1">
+                <div className="flex-1 leading-[1.5]">
                   <p className="font-bold text-xl">@{post.username || "Anonymous"}</p>
                   <p className="mt-4 mb-4 font-bold text-body">{post.title}</p>
                   <p className="mt-5 mb-5 text-body">{post.content}</p>
