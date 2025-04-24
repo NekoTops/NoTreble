@@ -6,6 +6,7 @@ import { auth } from "@/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { TfiControlBackward } from "react-icons/tfi";
 import "../../cs/MusicLibrary.css";
+import "../../cs/MusicLibrary.css";
 
 export default function Library() {
   const [files, setFiles] = useState([]);
@@ -24,7 +25,7 @@ export default function Library() {
       try {
         const response = await fetch(`/api/listfiles/${user.uid}`);
         const data = await response.json();
-        setFiles(data.files);
+        setFiles(Array.isArray(data.files) ? data.files : []);
       } catch (error) {
         console.error('Error fetching file list:', error);
       }
@@ -62,9 +63,10 @@ export default function Library() {
     }
   };
 
-  const filteredFiles = files.filter((file) =>
-    file.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredFiles = (files || []).filter((file) =>
+      file.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
 
   return (
 
@@ -117,8 +119,8 @@ export default function Library() {
                         onClick={() => handleDelete(file)}
                         >
                         🗑️
-                  </button>
-                </div>
+                        </button>
+                        </div>
                 </div>
               </td>
               )) }
