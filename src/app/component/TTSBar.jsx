@@ -10,7 +10,7 @@ export default function TTSBar() {
   const [buttonClicked, setButtonClicked] = useState(false); // State to track if the button is clicked
   const [isHovered, setIsHovered] = useState(false);
   const [showOptions, setShowOptions] = useState(false);  // State for the expanding button   
-  const { speakPageContent, stopSpeaking, isSpeaking, currentIndex, resumeSpeaking, rate, setRate, voice, setVoice, voices, setVoices } = useTTS(); // Use the TTS context
+  const { speakPageContent, stopSpeaking, isSpeaking, currentIndex, resumeSpeaking, rate, setRate, voice, setVoice, voices, setVoices, ttsAnnouncement, setTTSAnnouncement } = useTTS(); // Use the TTS context
   const menuRef = useRef();
     
   useEffect(() => {
@@ -154,6 +154,17 @@ export default function TTSBar() {
                   ))}
                 </select>
               </div>
+          </div>
+          {/* Option to toggle the page announcement*/}
+          <div>
+            <input 
+              type="checkbox"
+              id="announcementToggle"
+              checked={ttsAnnouncement}
+              onChange={(e) => setTTSAnnouncement(e.target.checked)}
+              className="w-6 h-6 m-4"
+            />
+            <label htmlFor="announcementToggle" className="text-body">Announce page</label>
           </div>
         </div>
         )}

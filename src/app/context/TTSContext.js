@@ -14,6 +14,7 @@ export const TTSProvider = ({ children }) => {
   const [rate, setRate] = useState(1);
   const [voice, setVoice] = useState();
   const [voices, setVoices] = useState();
+  const [ttsAnnouncement, setTTSAnnouncement] = useState(true);
   const pathname = usePathname(); // Gets the current page route
   const db = getFirestore();
   const lastAnnouncementRef = useRef("");
@@ -31,11 +32,49 @@ export const TTSProvider = ({ children }) => {
     localStorage.setItem("clickTTS", JSON.stringify(clickTTS));
   }, [clickTTS]);
 
+  // Fetching the saved values back when the page changes or reloads
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const currentUser = auth.currentUser;
+      if (!currentUser || !voices) return;
+
+      try {
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+  
+        if (userSnap.exists()) {
+          const data = userSnap.data();   // Grab data from user's document
+  
+          if (data.speed) {
+            setRate(data.speed);    // Update the rate of TTS
+          }
+  
+          if (data.voice) {
+            const matchedVoice = voices.find(v => v.name === data.voice);
+            if (matchedVoice) {
+              setVoice(matchedVoice);   // Update the voice of TTS
+            }
+          }
+          
+          if (data.hasOwnProperty("announcement")) {
+            setTTSAnnouncement(data.announcement); // Use the saved setting
+          } else {
+            setTTSAnnouncement(true); // Default if not set
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load TTS settings:", err.message);
+      }
+    };
+  
+    fetchSettings();
+  }, [voices]);
+    
   useEffect(() => {
     if (voice) {
-      saveTTSSettings(rate, voice);
+      saveTTSSettings(rate, voice, ttsAnnouncement);
     }
-  }, [rate, voice]);
+  }, [rate, voice, ttsAnnouncement]);
   
 
   useEffect(() => {
@@ -193,35 +232,41 @@ export const TTSProvider = ({ children }) => {
     }
 
     console.log('Clicked element:', element);
+
+    // If no content found, provide fallback content (e.g., read the entire page or say "No content available")
+    if (!content) {
+      element.classList.remove("tts-highlight");
+      return;
+    }
     // on click read
     console.log("I herd a clickkk");
 
     speakPageContent(0, content, element); // Read current paragraph
   };
 
-  // TEST FIXME: need to unmount the event listener when the pathname changes
-  // Old event listeners are still attached when they don't exist anymore
   useEffect(() => {
     if (!pathname) return;
 
-    // Split the path name into segments and only pick the last segment to announce it
-    const segments = pathname.split("/").filter(Boolean);
-    const lastSegment = segments[segments.length-1] || "Home";
+    if (ttsAnnouncement){
+      // Split the path name into segments and only pick the last segment to announce it
+      const segments = pathname.split("/").filter(Boolean);
+      const lastSegment = segments[segments.length-1] || "Home";
 
-    const pageName = lastSegment
-      .replace(/([A-Z])/g, " $1")
-      .replace(/-/g, " ")
-      .trim();
+      const pageName = lastSegment
+        .replace(/([A-Z])/g, " $1")
+        .replace(/-/g, " ")
+        .trim();
 
-    const announcement = `You are on the ${pageName} page`;
-    // Only speak if the announcement changed
-    if (lastAnnouncementRef.current !== announcement) {
-      lastAnnouncementRef.current = announcement;
-      speakText(announcement);
+      const announcement = `You are on the ${pageName} page`;
+      // Only speak if the announcement changed
+      if (lastAnnouncementRef.current !== announcement) {
+        lastAnnouncementRef.current = announcement;
+        speakText(announcement);
+      }
     }
-    
+
     if (!clickTTS) return;  // Unactive this when user choose to turn off this feature
-    const elements = document.querySelectorAll('p, h1, h2, h3, span, img, button, input, textarea, label');
+    const elements = document.querySelectorAll('p, h1, h2, h3, span, img, button, input, textarea, label, value');
     elements.forEach(element => {
       element.addEventListener('click', handleClick);
     });
@@ -234,15 +279,17 @@ export const TTSProvider = ({ children }) => {
     };
   }, [pathname, handleClick, clickTTS]);
 
-  const saveTTSSettings = async (rate, voice) => {
+  const saveTTSSettings = async (rate, voice, ttsAnnouncement) => {
     const currentUser = auth.currentUser;
     if (!currentUser) return;   // Don't save the changes if not logged in
     
     try {
+      // Save voice, rate and announcement settings
       const userRef = doc(db, "users", currentUser.uid);
       await updateDoc(userRef, {
         speed: rate,
-        voice: voice?.name || "", // Store voice name
+        voice: voice?.name || "", 
+        announcement: ttsAnnouncement
       });
       console.log("Saving voice to Firestore:", voice?.name);
       console.log("TTS settings saved to Firestore");
@@ -251,42 +298,12 @@ export const TTSProvider = ({ children }) => {
     }
   };
 
-  // Fetching the saved values back when the page changes or reloads
-  useEffect(() => {
-    const fetchSettings = async () => {
-      const currentUser = auth.currentUser;
-      if (!currentUser || !voices) return;
 
-      try {
-        const userRef = doc(db, "users", currentUser.uid);
-        const userSnap = await getDoc(userRef);
-  
-        if (userSnap.exists()) {
-          const data = userSnap.data();   // Grab data from user's document
-  
-          if (data.speed) {
-            setRate(data.speed);    // Update the rate of TTS
-          }
-  
-          if (data.voice) {
-            const matchedVoice = voices.find(v => v.name === data.voice);
-            if (matchedVoice) {
-              setVoice(matchedVoice);   // Update the voice of TTS
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load TTS settings:", err.message);
-      }
-    };
-  
-    fetchSettings();
-  }, [voices]);
 
 
   return (
     <TTSContext.Provider value={{ getPageText, speakPageContent, resumeSpeaking, stopSpeaking, isSpeaking, currentIndex,
-       rate, setRate, voice, setVoice, voices, setVoices, speakText, clickTTS, setClickTTS }}>
+       rate, setRate, voice, setVoice, voices, setVoices, speakText, clickTTS, setClickTTS, ttsAnnouncement, setTTSAnnouncement }}>
       {children}
     </TTSContext.Provider>
   );

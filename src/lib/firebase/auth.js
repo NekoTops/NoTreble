@@ -22,6 +22,7 @@ const signUp = async (email, password, username, profilePic) => {
       textSize: "medium", // Default text size
       speed: 1,
       voice: "Google US English",
+      announcement: true,
       createdAt: new Date(),
     });
 
