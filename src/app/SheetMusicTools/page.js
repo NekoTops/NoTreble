@@ -109,95 +109,151 @@ export default function SheetMusicTools() {
   };
 
   return (
-    <main>
-      <div className="m-20">
-        <h1 className="font-bold mb-7 text-4xl">Sheet Music Converter</h1>
-
-  <div className="w-auto h-auto bg-gray-200 rounded-2xl text-body p-4 pl-7 flex flex-col md:flex-row border-2 border-gray-400">
-    <div className="md:w-1/2 flex flex-col justify-between p-4">
-      <FileUploader setFile={handleFileChange} />
-
-
-    </div>
-
-          <div className="w-1/2 p-4">
-            {preview ? (
-              file.type === "application/pdf" ? (
-                <embed
-                  src={preview}
-                  type="application/pdf"
-                  className="w-full h-full max-h-full object-contain"
-                />
-              ) : (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="w-full h-full max-h-full object-contain rounded"
-                />
-              )
-            ) : (
-              <span className="text-gray-500">No file uploaded</span>
+    <main className="p-6">
+      <h1 className="font-bold mb-7 text-4xl">Sheet Music Converter</h1>
+  
+      <div className="flex flex-col lg:flex-row gap-6 bg-gray-200 p-6 rounded-2xl border-2 border-gray-400">
+        {/* LEFT: File Upload + Form (Aligned vertically) */}
+        <div className="w-full lg:w-1/2">
+          <div className="flex flex-col space-y-4 items-start">
+            {/* File Upload */}
+            <div className="w-full max-w-md">
+              <FileUploader setFile={handleFileChange} />
+            </div>
+  
+            {/* Enter Piece Information */}
+            <div className="bg-white p-5 rounded-xl border shadow w-full max-w-md">
+              <h2 className="text-2xl font-semibold mb-4">Enter Piece Information</h2>
+  
+              <form onSubmit={handleSubmit} className="space-y-4 text-base w-full">
+              <div className="w-full">
+                  <label className="block mb-1 font-medium">Title:</label>
+                  <SheetMusicInput
+                    type="text"
+                    name="title"
+                    value={sheet.title}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+  
+                <div className="w-full">
+                  <label className="block mb-1 font-medium">Composer:</label>
+                  <SheetMusicInput
+                    type="text"
+                    name="composer"
+                    value={sheet.composer}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+  
+                <div className="w-full">
+                  <label className="block mb-1 font-medium">Key:</label>
+                  <SheetMusicInput
+                    type="text"
+                    name="key"
+                    value={sheet.key}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+  
+                <div className="w-full">
+                  <label className="block mb-1 font-medium">Time Signature:</label>
+                  <SheetMusicInput
+                    type="text"
+                    name="timesig"
+                    value={sheet.timesig}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+              </form>
+            </div>
+  
+            {/* Upload Button */}
+            <button
+              className="w-full max-w-md font-bold bg-[#455090] hover:bg-[#102437] text-white py-3 rounded shadow flex justify-center items-center gap-2"
+              onClick={handleUpload}
+              disabled={uploading}
+            >
+              {uploading ? "Saving..." : "Save File"} <GiSaveArrow className="text-xl" />
+            </button>
+  
+            {/* Upload status */}
+            {uploadStatus && (
+              <p className="text-gray-600 text-sm max-w-md">{uploadStatus}</p>
             )}
           </div>
-          {uploadStatus && <p className="mt-2 text-body">{uploadStatus}</p>}
-
         </div>
-
-        <div >
-        <button className="text-center text-body  font-bold hover:bg-[#102437] bg-[#455090] text-white px-8 py-4 rounded-md mb-6 shadow-lg ml-80 float-right inline-flex gap-4" 
-        onClick={handleUpload} disabled={uploading}>
-      {uploading ? "Saving..." : "Save File"} <GiSaveArrow className="text-gray-800 text-4xl" />
-      </button>
-
-        <Link href="SheetMusicTools/MusicLibrary">
-      <button className="text-center text-body font-bold hover:bg-[#102437] bg-[#455090] text-white px-4 py-4 rounded-md mb-4 shadow-lg">
-      Go to Music Library 🎵 
-      </button>
-    </Link>
-
+  
+        {/* RIGHT: File Preview */}
+        <div className="flex-1 bg-white rounded-xl shadow p-4 flex items-center justify-center min-h-[700px] max-h-[700px] overflow-hidden">
+          {preview ? (
+            file?.type === "application/pdf" ? (
+              <embed
+                src={preview}
+                type="application/pdf"
+                className="w-full h-full rounded border"
+              />
+            ) : (
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-full max-h-full object-contain rounded"
+              />
+            )
+          ) : (
+            <span className="text-gray-500 text-lg">No file uploaded</span>
+          )}
+        </div>
       </div>
-  <div >
   
-  
-  
-  </div>
+{/* MUSIC LIBRARY BUTTON */}
+<div className="mt-8 mb-4 flex justify-center">
+  <Link href="/SheetMusicTools/MusicLibrary">
+    <button className="font-bold bg-[#455090] hover:bg-[#102437] text-white px-6 py-3 rounded shadow">
+      Go to Music Library 🎵
+    </button>
+  </Link>
 </div>
 
-      <div className="ml-20 mr-20 mb-20">
-        <h1 className="font-bold mb-7 text-4xl">Sheet Music Composer</h1>
-        <form className="block bg-gray-200 rounded-2xl p-4 pl-7 text-3xl border-2 border-gray-400" onSubmit={handleSubmit}>
-          <label className="block mb-4">
-            Enter Title:
-            <SheetMusicInput type="text" name="title" value={sheet.title} onChange={handleChange} />
-          </label>
-          <label className="block mb-4">
-            Enter Composer Name:
-            <SheetMusicInput type="text" name="composer" value={sheet.composer} onChange={handleChange} />
-          </label>
-          <label className="block mb-4">
-            Enter Key:
-            <SheetMusicInput type="text" name="key" value={sheet.key} onChange={handleChange} />
-          </label>
-          <label className="block mb-4">
-            Enter Time Signature:
-            <SheetMusicInput type="text" name="timesig" value={sheet.timesig} onChange={handleChange} />
-          </label>
-        </form>
+{/* COMPOSING CTA SECTION */}
+<div className="bg-[#f5f5f5] mt-6 p-8 rounded-2xl shadow border border-gray-300 text-center flex flex-col items-center max-w-4xl mx-auto">
+  <h2 className="text-3xl font-bold mb-2">Start Writing Your Own Music!</h2>
+  <p className="text-lg text-gray-700 mb-6 max-w-xl">
+    Turn your ideas into reality with our intuitive sheet music composer. Add notes, customize rhythms, and hear your composition come to life.
+  </p>
 
-        <Link
-          href={{
-            pathname: "/SheetMusicTools/MusicComposer",
-            query: {
-              title: sheet.title,
-              key: sheet.key,
-              timesig: sheet.timesig,
-              composer: sheet.composer,
-            },
-          }}
-        >
-          <button className="mt-4">🎼 Start Composing</button>
-        </Link>
-      </div>
+
+  <div className="mb-6">
+  <img
+    src="/piano.jpg"
+    alt="Compose your music"
+    className="w-full max-w-md rounded shadow"
+  />
+</div>
+
+
+  {/* Composing Button */}
+  <Link
+    href={{
+      pathname: "/SheetMusicTools/MusicComposer",
+      query: {
+        title: sheet.title,
+        key: sheet.key,
+        timesig: sheet.timesig,
+        composer: sheet.composer,
+      },
+    }}
+  >
+    <button className="text-xl font-bold bg-green-600 hover:bg-green-800 text-white px-10 py-4 rounded-xl shadow-lg transition duration-300">
+      🎼 Start Composing
+    </button>
+  </Link>
+</div>
+
     </main>
-  );
-}
+  );  
+}  

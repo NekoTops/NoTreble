@@ -38,7 +38,8 @@ export default function Home() {
             <p className="wd-50">
               No Treble provides an accessible learning environment for visually impaired people to learn music theory and access sheet music reading and writing tools.
             </p>
-            <p className="italic text-[#2a325e]"> Move quick with CTRL + arrow keys</p>
+            <p className="italic text-[#2a325e]"> Press CTRL + (→) to go Next page</p>
+            <p className="italic text-[#2a325e]"> Press CTRL + (←) to go Previous Page</p>
             <p className="italic text-[#2a325e]"> Press SPACE to toggle TTS</p>
             <p></p>
           </div>

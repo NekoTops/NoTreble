@@ -10,6 +10,7 @@
     box-sizing: border-box;
     justify-content: center;
     overflow:auto;
+    scrollbar-width:thin;
 }
 .nav-list{
     /* align-self: center; */

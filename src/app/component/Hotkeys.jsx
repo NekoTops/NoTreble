@@ -4,11 +4,29 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export const HotKeyProvider = () => {
+    const pagelist = ["/", "/Lessons","QuickReference", "/SheetMusicTools", "/Community"];
+    const [page, setPage] = useState(0);
     const router = useRouter();
-    useHotkeys('ctrl+arrowup', () => { router.push("/") })
-    useHotkeys('ctrl+arrowdown', () => { router.push("/Lessons") })
-    useHotkeys('ctrl+arrowleft', () => { router.push("/SheetMusicTools") })
-    useHotkeys("ctrl+arrowright", () => { router.push("/Community") })
+    useHotkeys('ctrl+arrowleft', () => { 
+        if(page <= 0){
+            setPage(4);
+            router.push(pagelist[page]) 
+        }
+        else{
+            setPage(page - 1);
+            router.push(pagelist[page]) 
+        }
+    })
+    useHotkeys('ctrl+arrowright', () => { 
+        if(page >= 4){
+            setPage(0);
+            router.push(pagelist[page]) 
+        }
+        else{
+            setPage(page + 1);
+            router.push(pagelist[page]) 
+        }
+    })
     return (
         <>
         </>
