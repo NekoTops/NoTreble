@@ -8,8 +8,6 @@ import { usePathname } from "next/navigation";
 const TTSContext = createContext();
 
 export const TTSProvider = ({ children }) => {
-  // --------------- STATE VARIABLES ---------------
-  // Speech synthesis and related states
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [utterance, setUtterance] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(null);
@@ -20,13 +18,12 @@ export const TTSProvider = ({ children }) => {
   const pathname = usePathname(); // Gets the current page route
   const db = getFirestore();
   const lastAnnouncementRef = useRef("");
+  let ttsInitialized = false;
 
-  // TTS settings and preferences
-  const [ttsAnnouncement, setTTSAnnouncement] = useState(true);
   const [clickTTS, setClickTTS] = useState(() => {
     if (typeof window !== "undefined") {
       const storedClickTTS = localStorage.getItem("clickTTS");
-      return storedClickTTS ? JSON.parse(storedClickTTS) : true; // Default to true if not set
+      return storedClickTTS ? JSON.parse(storedClickTTS) : true;  // Default to true if not set
     }
     return true;  // Default value if running in server-side environment
   });
@@ -83,175 +80,201 @@ export const TTSProvider = ({ children }) => {
 
   useEffect(() => {
     const synth = window.speechSynthesis;
-  
+    
+    // Get the voices available for different browsers
     const loadVoices = () => {
-      const voices = synth.getVoices();
-      if (voices.length > 0) {
-        setVoices(voices);
-        // Optional fallback
-        if (!voice) setVoice(voices[0]);
+      const availableVoices = synth.getVoices();
+      setVoices(availableVoices);   // Store all voices
+
+      // Set to default voice if none is saved
+      if (!voice){
+        setVoice(availableVoices[0]);   // Default voice
       }
     };
+    const newUtterance = new SpeechSynthesisUtterance();
+    setUtterance(newUtterance);
   
-    // Some browsers fire `onvoiceschanged`, some don’t
+    // Stop speech and reset state on route change
+    synth.cancel();
+    setIsSpeaking(false);
+    setCurrentIndex(0);
+
     if (synth.onvoiceschanged !== undefined) {
       synth.onvoiceschanged = loadVoices;
     }
   
-    loadVoices();
-  }, []);
+    loadVoices(); // Also run on mount
+  
+    return () => {
+      synth.cancel(); // Also stop speech on unmount
+    };
+  }, [pathname]);
 
-  // Set voice and rate from localStorage AFTER voices load
-  useEffect(() => {
-    if (!voices || voices.length === 0) return;
+  const wrapVisibleTextNodes = () => {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        if (!node.parentElement || node.parentElement.offsetParent === null) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    });
   
-    const storedVoiceName = localStorage.getItem("ttsVoice");
-    const storedRate = parseFloat(localStorage.getItem("ttsRate"));
+    let index = 0;
+    const nodesToWrap = [];
   
-    // Set voice
-    const match = voices.find(v => v.name === storedVoiceName);
-    if (match && (!voice || voice.name !== match.name)) {
-      setVoice(match);
+    while (walker.nextNode()) {
+      nodesToWrap.push(walker.currentNode);
     }
   
-    // Set rate
-    if (!isNaN(storedRate) && rate !== storedRate) {
-      setRate(storedRate);
+    nodesToWrap.forEach((textNode) => {
+      const parent = textNode.parentNode;
+      const words = textNode.textContent.trim().split(/\s+/);
+      const fragment = document.createDocumentFragment();
+  
+      words.forEach((word) => {
+        const span = document.createElement("span");
+        span.textContent = word + " ";
+        span.className = "tts-word";
+        span.dataset.ttsIndex = index++; // Assign a unique index to each word
+        fragment.appendChild(span);
+      });
+  
+      parent.replaceChild(fragment, textNode);
+    });
+  };
+  
+  const getPageText = () => {
+    // Clone the entire body so we can manipulate it without affecting the real DOM
+    const bodyClone = document.body.cloneNode(true);
+  
+    // Find and remove the TTS bar from the cloned body (so it’s not read out loud)
+    const ttsBar = bodyClone.querySelector(".ttsBar");
+    if (ttsBar) {
+      ttsBar.remove();
     }
-  }, [voices]); // Run once when voices are available
   
-
+    // Remove any unwanted tags that might contain scripts, styles, or non-visible content
+    const unwantedTags = bodyClone.querySelectorAll("script, style, template");
+    unwantedTags.forEach(tag => tag.remove());
   
-  // Save clickTTS, rate, and voice preference to localStorage
-  useEffect(() => {
-    localStorage.setItem("clickTTS", JSON.stringify(clickTTS));
-  }, [clickTTS]);
-
-  useEffect(() => {
-    if (voice) {
-      localStorage.setItem("ttsVoice", voice.name);
+    // Replace each image with its alt text (if it exists)
+    const images = bodyClone.querySelectorAll("img");
+    images.forEach((img) => {
+      const altText = img.alt || "";                          // Use the alt text if available
+      const altNode = document.createTextNode(altText + " "); // Create a text node from alt text
+      img.replaceWith(altNode);                               // Replace the image with that text node
+    });
+  
+    // Return all visible, readable text from the cleaned-up cloned body
+    return bodyClone.innerText.trim();
+  };
+  
+  
+  const speakPageContent = (startIndex = 0, content = getPageText(), element = null) => {
+    if (!utterance) return;
+  
+    if (!ttsInitialized) {
+      wrapVisibleTextNodes(); // Initialize text wrapping only once
+      ttsInitialized = true;
     }
-  }, [voice]); // Save voice immediately when it changes
   
-  useEffect(() => {
-    if (!isNaN(rate)) {
-      localStorage.setItem("ttsRate", rate.toString());
-    }
-  }, [rate]); // Save rate immediately when it changes
+    const text = content;
+    if (!text) return;
+    console.log("Text TTS will read:\n", content);
   
-
-  // Save TTS settings to Firestore when updated
-  useEffect(() => {
-    if (voice && rate) {
-      saveTTSSettings(rate, voice, ttsAnnouncement); // Save settings to Firestore when they change
-    }
-  }, [rate, voice, ttsAnnouncement]);
+    // Split the text into words
+    const words = text.split(/\s+/);
+    const resumedText = words.slice(startIndex).join(" "); // Resume from the correct spot
   
-
-  // Fetch settings from Firebase on mount
-  useEffect(() => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
+    window.speechSynthesis.cancel(); // Stop previous speech
   
-    const fetchSettings = async () => {
-      const userRef = doc(db, "users", currentUser.uid);
-      const docSnap = await getDoc(userRef);
+    utterance.rate = rate;
+    utterance.voice = voice;
+    utterance.text = resumedText; // Only the remaining words
+    let spokenWordCount = startIndex;
   
-      if (docSnap.exists()) {
-        const data = docSnap.data();
+    utterance.onboundary = (event) => {
+      if (event.name === "word") {
+        // Calculate how many words have been spoken based on the charIndex
+        const spokenWords = resumedText.slice(0, event.charIndex).split(/\s+/).length;
+        spokenWordCount = startIndex + spokenWords;
   
-        if (!localStorage.getItem("ttsVoice") && data.voice) {
-          const match = window.speechSynthesis.getVoices().find(v => v.name === data.voice);
-          if (match) setVoice(match);
+        // Clear previous highlights
+        document.querySelectorAll(".tts-word.tts-highlight").forEach((el) => {
+          el.classList.remove("tts-highlight");
+        });
+  
+        // Find the span that corresponds to the current word
+        const currentWord = document.querySelector(`[data-tts-index="${spokenWordCount - 1}"]`);
+        if (currentWord) {
+          currentWord.classList.add("tts-highlight"); // Highlight the current word
         }
-  
-        if (!localStorage.getItem("ttsRate") && data.speed) {
-          setRate(data.speed);
-        }
-  
-        setTTSAnnouncement(data.announcement ?? true);
       }
     };
   
-    fetchSettings();
-  }, []);
+    // Start the TTS speech
+    window.speechSynthesis.speak(utterance); // Start speaking
+    setIsSpeaking(true);
   
-  // --------------- TTS FUNCTIONS ---------------
-  const speakText = (text) => {
-    if (!utterance || !text) return;
+    utterance.onend = () => {
+      // Reset highlighting after speech ends
+      document.querySelectorAll(".tts-word.tts-highlight").forEach((el) => {
+        el.classList.remove("tts-highlight");
+      });
+  
+      document.querySelectorAll(".highlight-element").forEach((el) => {
+        el.classList.remove("highlight-element");
+      });
+  
+      setIsSpeaking(false);
+      setCurrentIndex(null); // Reset index for future plays
+    };
+  };
+  
 
-    window.speechSynthesis.cancel();
+  // Speak function for quick content
+  const speakText = (text) => {
+    if (!utterance || !text) return;  
+
+    window.speechSynthesis.cancel();    // Stop anything already speaking
+
     utterance.text = text;
     utterance.voice = voice;
     utterance.rate = rate;
 
-    window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.speak(utterance); // Start speaking
     setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
-  };
+  }
 
-  const speakPageContent = (startIndex = 0, content = getPageText(), element = null) => {
-    if (!content) return;
-  
-    const words = content.split(/\s+/);
-    const resumedText = words.slice(startIndex).join(" ");
-  
-    // Always cancel previous utterance
-    window.speechSynthesis.cancel();
-  
-    // Create a new utterance instance per call
-    const newUtterance = new SpeechSynthesisUtterance(resumedText);
-    newUtterance.rate = rate;
-    newUtterance.voice = voice;
-  
-    let spokenWordCount = startIndex;
-  
-    newUtterance.onboundary = (event) => {
-      if (event.name === "word") {
-        const spokenWords = resumedText.slice(0, event.charIndex).split(/\s+/).length;
-        spokenWordCount = startIndex + spokenWords;
-        setCurrentIndex(spokenWordCount - 1);
-      }
-    };
-  
-    newUtterance.onend = () => {
-      if (element) {
-        document.querySelectorAll(".tts-highlight").forEach(el => el.classList.remove("tts-highlight"));
-      }
-      setIsSpeaking(false);
-      setCurrentIndex(null);
-    };
-  
-    setIsSpeaking(true);
-    window.speechSynthesis.speak(newUtterance);
-  };
-
+  // Resume function
   const resumeSpeaking = () => {
     if (currentIndex !== null) {
-      speakPageContent(currentIndex);
+      speakPageContent(currentIndex); // Restart from last spoken word
     }
   };
-
+  
   const stopSpeaking = () => {
-    window.speechSynthesis.pause();
-    setIsSpeaking(false);
+    window.speechSynthesis.pause(); // resume speech
+    setIsSpeaking(false); // Update state
   };
 
-  // --------------- USER INTERACTION HANDLING ---------------
   const handleClick = (event) => {
     const element = event.target;
     let content = "";
   
-    // Clear previous highlights to avoid multiple elements being highlighted at the same time
+    window.speechSynthesis.pause();
+
+    // Clear previous highlights
     document.querySelectorAll(".tts-highlight").forEach(el => el.classList.remove("tts-highlight"));
-  
+
     // Add highlight to the current clicked element
     element.classList.add("tts-highlight");
-  
-    // If the clicked element is a speaker icon, speak the TTS Menu
+
+    // When clicking the speaker icon, it should read "TTS Menu" instead of the whole page
     if (element.closest('[data-ignore-tts]')) {
       if (isSpeaking) return;
-      stopSpeaking();  // Stop any ongoing speech before starting a new one
+      stopSpeaking();
       speakText("TTS Menu");
       return;
     }
@@ -271,7 +294,7 @@ export const TTSProvider = ({ children }) => {
 
     console.log('Clicked element:', element);
 
-    // If no content found, provide fallback content (e.g., read the entire page or say "No content available")
+    // If no content found, don't speak anything and also remove highlight
     if (!content) {
       element.classList.remove("tts-highlight");
       return;
@@ -319,8 +342,8 @@ export const TTSProvider = ({ children }) => {
 
   const saveTTSSettings = async (rate, voice, ttsAnnouncement) => {
     const currentUser = auth.currentUser;
-    if (!currentUser) return;
-  
+    if (!currentUser) return;   // Don't save the changes if not logged in
+    
     try {
       // Save voice, rate and announcement settings
       const userRef = doc(db, "users", currentUser.uid);
@@ -335,8 +358,6 @@ export const TTSProvider = ({ children }) => {
       console.error("Error saving TTS settings:", error.message);
     }
   };
-
-
 
 
   return (
