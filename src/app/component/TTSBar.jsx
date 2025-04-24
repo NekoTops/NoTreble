@@ -10,7 +10,7 @@ export default function TTSBar() {
   const [buttonClicked, setButtonClicked] = useState(false); // State to track if the button is clicked
   const [isHovered, setIsHovered] = useState(false);
   const [showOptions, setShowOptions] = useState(false);  // State for the expanding button   
-  const { speakPageContent, stopSpeaking, isSpeaking, currentIndex, resumeSpeaking, rate, setRate, voice, setVoice, voices, setVoices, ttsAnnouncement, setTTSAnnouncement } = useTTS(); // Use the TTS context
+  const { speakPageContent, speakText, stopSpeaking, isSpeaking, currentIndex, resumeSpeaking, rate, setRate, voice, setVoice, voices, setVoices, ttsAnnouncement, setTTSAnnouncement } = useTTS(); // Use the TTS context
   const menuRef = useRef();
     
   useEffect(() => {
@@ -62,12 +62,14 @@ export default function TTSBar() {
     stopSpeaking();
     const newRate = parseFloat(e.target.value);
     setRate(newRate);
+    speakText(`Speed: ${newRate}`);  // Inform the user the change in tts speed
   };
 
   const handleExpand = () => {
     setShowOptions(prev => !prev);
   };
-
+  
+  // Get the first 3 voices from the available voices list
   const filteredVoices = voices.slice(0, 3);
 
   const handleVoiceChange = (e) => {
@@ -75,14 +77,28 @@ export default function TTSBar() {
     const selectedVoice = filteredVoices.find((v) => v.name === e.target.value);
     console.log("voice:", selectedVoice)
     setVoice(selectedVoice); // Update the voice in the TTS context
+    speakText(`Voice: ${e.target.selectedOptions[0].text}`);  // Inform the user the change in tts voice
   };
 
-  // Get the first 3 voices from the available voices list
+  const handleAnnouncement = (e) => {
+    setTTSAnnouncement(e.target.checked);
+    
+    let choice = "";
+
+    if (e.target.checked) {
+      choice = "on";
+    }
+    else {
+      choice = "off";
+    }
+
+    speakText(`Announce Page ${choice}`)
+  }
+
 
   return (
     <div
-      className="ttsBar"
-      style={{ position: "fixed", bottom: "10px", right: "60px", zIndex: 1000 }}
+      style={{ position: "fixed", bottom: "10px", right: "20px", zIndex: 1000 }}
     >
       <div style={{ position: "relative" }} ref={menuRef}>
         {/* Speaker button (only toggles dropdown) */}
@@ -93,7 +109,7 @@ export default function TTSBar() {
             handleExpand();
           }}
         >
-          <HiMiniSpeakerWave size={50} className="hover:scale-125" />
+          <HiMiniSpeakerWave size={70} data-ignore-tts className= "hover:scale-125" />
         </button>
 
         {/* Dropdown Options */}
@@ -128,6 +144,7 @@ export default function TTSBar() {
                     handleRate(e);
                   }}
                   className="content-center text-center text-body bg-gray-300 shadow"
+                  title={`Speed: ${rate}`}
                 >
                   <option value="0.5">0.5</option>
                   <option value="0.75">0.75</option>
@@ -148,6 +165,7 @@ export default function TTSBar() {
                     e.stopPropagation();
                     handleVoiceChange(e);
                   }}
+                  title={`Voice: ${voice?.name}`}
                 >
                   {filteredVoices.map((v, i) => (
                     <option key={i} value={v.name}>{`Voice ${i + 1}`}</option>
@@ -161,8 +179,8 @@ export default function TTSBar() {
               type="checkbox"
               id="announcementToggle"
               checked={ttsAnnouncement}
-              onChange={(e) => setTTSAnnouncement(e.target.checked)}
-              className="w-6 h-6 m-4"
+              onChange={(e) => handleAnnouncement(e)}
+              className="tts-announcement w-6 h-6 m-4"
             />
             <label htmlFor="announcementToggle" className="text-body">Announce page</label>
           </div>

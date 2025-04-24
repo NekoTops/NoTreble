@@ -222,9 +222,13 @@ export const TTSProvider = ({ children }) => {
       return;
     }
 
+    if (element.closest("tts-announcement")){
+      return;
+    }
+
     // Determine what to read for input, label and images
-    if (["INPUT", "LABEL", "TEXTAREA"].includes(element.tagName)) {
-      content = element.value?.trim() || element.getAttribute("placeholder")?.trim() || element.getAttribute("name")?.trim();
+    if (["INPUT", "LABEL", "TEXTAREA", "SELECT"].includes(element.tagName)) {
+      content = element.value?.trim() || element.getAttribute("placeholder")?.trim() || element.getAttribute("name")?.trim() || element.getAttribute("title")?.trim();
     } else if (element.tagName === "IMG") {
       content = element.alt?.trim();
     } else {
