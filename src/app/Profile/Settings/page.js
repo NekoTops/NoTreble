@@ -198,12 +198,12 @@ const Settings = () => {
       </div>
 
 
-      <button
+      {/* <button
         onClick={handleSaveChanges} // Save all changes when clicked
         className="m-auto bg-[#455090] text-white text-body rounded-xl px-5 py-3 hover:bg-blue-600 mb-6"
       >
         Save Changes
-      </button>
+      </button> */}
 
 
       <button
