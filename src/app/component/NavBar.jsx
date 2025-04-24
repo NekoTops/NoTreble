@@ -79,10 +79,11 @@ function NavBar() {
     />
 
 {[
-  { href: "/", label: "Home (↑)" },
-  { href: "/Lessons", label: "Lessons (↓)" },
-  { href: "/SheetMusicTools", label: "Sheet Music Tools (←)" },
-  { href: "/Community", label: "Community (→)" },
+  { href: "/", label: "Home" },
+  { href: "/Lessons", label: "Lessons" },
+  { href: "/QuickReference", label: "Quick Reference" },
+  { href: "/SheetMusicTools", label: "Sheet Music Tools" },
+  { href: "/Community", label: "Community" },
 ].map((item) => (
   <li key={item.href} onMouseEnter={(e) => handleHover(e)}>
     <NavLink href={item.href} activeClassName="bubble" nonActiveClassName="">

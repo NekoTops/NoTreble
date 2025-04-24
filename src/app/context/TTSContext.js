@@ -16,6 +16,10 @@ export const TTSProvider = ({ children }) => {
   const [rate, setRate] = useState(1);
   const [voice, setVoice] = useState();
   const [voices, setVoices] = useState();
+  const [ttsAnnouncement, setTTSAnnouncement] = useState(true);
+  const pathname = usePathname(); // Gets the current page route
+  const db = getFirestore();
+  const lastAnnouncementRef = useRef("");
 
   // TTS settings and preferences
   const [ttsAnnouncement, setTTSAnnouncement] = useState(true);
@@ -24,15 +28,59 @@ export const TTSProvider = ({ children }) => {
       const storedClickTTS = localStorage.getItem("clickTTS");
       return storedClickTTS ? JSON.parse(storedClickTTS) : true; // Default to true if not set
     }
-    return true;
+    return true;  // Default value if running in server-side environment
   });
 
-  const pathname = usePathname(); // Get current page route
-  const db = getFirestore();
-  const lastAnnouncementRef = useRef(""); // For preventing repeated announcements
+  useEffect(() => {
+    // Save the `clickTTS` value to localStorage whenever it changes
+    localStorage.setItem("clickTTS", JSON.stringify(clickTTS));
+  }, [clickTTS]);
 
-  // --------------- EFFECT HOOKS ---------------
-  // Load voices and create utterance when page changes
+  // Fetching the saved values back when the page changes or reloads
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const currentUser = auth.currentUser;
+      if (!currentUser || !voices) return;
+
+      try {
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+  
+        if (userSnap.exists()) {
+          const data = userSnap.data();   // Grab data from user's document
+  
+          if (data.speed) {
+            setRate(data.speed);    // Update the rate of TTS
+          }
+  
+          if (data.voice) {
+            const matchedVoice = voices.find(v => v.name === data.voice);
+            if (matchedVoice) {
+              setVoice(matchedVoice);   // Update the voice of TTS
+            }
+          }
+          
+          if (data.hasOwnProperty("announcement")) {
+            setTTSAnnouncement(data.announcement); // Use the saved setting
+          } else {
+            setTTSAnnouncement(true); // Default if not set
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load TTS settings:", err.message);
+      }
+    };
+  
+    fetchSettings();
+  }, [voices]);
+    
+  useEffect(() => {
+    if (voice) {
+      saveTTSSettings(rate, voice, ttsAnnouncement);
+    }
+  }, [rate, voice, ttsAnnouncement]);
+  
+
   useEffect(() => {
     const synth = window.speechSynthesis;
   
@@ -207,85 +255,40 @@ export const TTSProvider = ({ children }) => {
       speakText("TTS Menu");
       return;
     }
-  
-    // Check if the clicked element is an image or contains an image
-    if (element.tagName === "IMG") {
-      content = element.alt?.trim();  // Read the alt text of the clicked image
-    } else if (element.tagName === "A" && element.querySelector("img")) {
-      const img = element.querySelector("img");
-      content = img.alt?.trim();  // Read the alt text of the image inside the anchor
-    } else if (["INPUT", "LABEL", "TEXTAREA"].includes(element.tagName)) {
-      content = element.value?.trim() || element.getAttribute("placeholder")?.trim() || element.getAttribute("name")?.trim();
+
+    if (element.closest("tts-announcement")){
+      return;
+    }
+
+    // Determine what to read for input, label and images
+    if (["INPUT", "LABEL", "TEXTAREA", "SELECT"].includes(element.tagName)) {
+      content = element.value?.trim() || element.getAttribute("placeholder")?.trim() || element.getAttribute("name")?.trim() || element.getAttribute("title")?.trim();
+    } else if (element.tagName === "IMG") {
+      content = element.alt?.trim();
     } else {
       content = element.innerText?.trim();
     }
-  
-    // If content exists (i.e., alt text or inner text), read it; otherwise, read the entire page
-    if (content) {
-      console.log("Clicked element:", element);
-      stopSpeaking();  // Stop any current speech to make room for the new content
-      speakPageContent(0, content, element);  // Read the content of the clicked element
-    } else {
+
+    console.log('Clicked element:', element);
+
+    // If no content found, provide fallback content (e.g., read the entire page or say "No content available")
+    if (!content) {
+      element.classList.remove("tts-highlight");
       return;
     }
-  };
-  
-  // --------------- FIRESTORE FUNCTIONS ---------------
-  const saveTTSSettings = async (rate, voice, ttsAnnouncement) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-  
-    try {
-      const userRef = doc(db, "users", currentUser.uid);
-      const docSnap = await getDoc(userRef);
-  
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        
-        // Preserve other fields and only update TTS settings
-        const updatedData = {
-          ...userData,
-          speed: rate,               // Only update the TTS speed
-          voice: voice?.name || "",  // Only update the voice
-          announcement: ttsAnnouncement // Only update the announcement setting
-        };
-  
-        await updateDoc(userRef, updatedData); // Update only TTS settings
-        console.log("Saving voice to Firestore:", voice?.name);
-      }
-    } catch (error) {
-      console.error("Error saving TTS settings:", error.message);
-    }
-  };
-  
+    // on click read
+    console.log("I herd a clickkk");
 
-  // --------------- PAGE CONTENT EXTRACTION ---------------
-  const getPageText = () => {
-    const bodyClone = document.body.cloneNode(true);
-
-    const ttsBar = bodyClone.querySelector(".ttsBar");
-    if (ttsBar) {
-      ttsBar.remove();
-    }
-
-    const unwantedTags = bodyClone.querySelectorAll("script, style, template");
-    unwantedTags.forEach(tag => tag.remove());
-
-    const images = bodyClone.querySelectorAll("img");
-    images.forEach((img) => {
-      const altText = img.alt || "";
-      const altNode = document.createTextNode(altText + " ");
-      img.replaceWith(altNode);
-    });
-
-    return bodyClone.innerText.trim();
+    speakPageContent(0, content, element); // Read current paragraph
   };
 
-  // --------------- SIDE EFFECT HOOKS FOR ROUTE CHANGES ---------------
   useEffect(() => {
-    if (ttsAnnouncement) {
+    if (!pathname) return;
+
+    if (ttsAnnouncement){
+      // Split the path name into segments and only pick the last segment to announce it
       const segments = pathname.split("/").filter(Boolean);
-      const lastSegment = segments[segments.length - 1] || "Home";
+      const lastSegment = segments[segments.length-1] || "Home";
 
       const pageName = lastSegment
         .replace(/([A-Z])/g, " $1")
@@ -293,41 +296,52 @@ export const TTSProvider = ({ children }) => {
         .trim();
 
       const announcement = `You are on the ${pageName} page`;
-
+      // Only speak if the announcement changed
       if (lastAnnouncementRef.current !== announcement) {
         lastAnnouncementRef.current = announcement;
         speakText(announcement);
       }
     }
 
-    if (!clickTTS) return;
-
-    const attachListeners = () => {
-      const elements = document.querySelectorAll('p, h1, h2, h3, span, img, button, input, textarea, label, a');
-      elements.forEach(el => el.addEventListener('click', handleClick));
-    };
-  
-    attachListeners();
-  
-    // Use a MutationObserver to reattach after route changes
-    const observer = new MutationObserver(() => {
-      attachListeners();
+    if (!clickTTS) return;  // Unactive this when user choose to turn off this feature
+    const elements = document.querySelectorAll('p, h1, h2, h3, span, img, button, input, textarea, label, value');
+    elements.forEach(element => {
+      element.addEventListener('click', handleClick);
     });
-  
-    observer.observe(document.body, { childList: true, subtree: true });
-  
+
     return () => {
-      observer.disconnect();
-      const elements = document.querySelectorAll('p, h1, h2, h3, span, img, button, input, textarea, label, a');
-      elements.forEach(el => el.removeEventListener('click', handleClick));
+    elements.forEach(element => {
+      // Clean up the old event listeners and make sure the current DOM elements have nothing from the previous route
+      element.removeEventListener('click', handleClick);
+    });
     };
-  }, [pathname, clickTTS]);
+  }, [pathname, handleClick, clickTTS]);
+
+  const saveTTSSettings = async (rate, voice, ttsAnnouncement) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+  
+    try {
+      // Save voice, rate and announcement settings
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, {
+        speed: rate,
+        voice: voice?.name || "", 
+        announcement: ttsAnnouncement
+      });
+      console.log("Saving voice to Firestore:", voice?.name);
+      console.log("TTS settings saved to Firestore");
+    } catch (error) {
+      console.error("Error saving TTS settings:", error.message);
+    }
+  };
+
+
+
 
   return (
-    <TTSContext.Provider value={{
-      getPageText, speakPageContent, resumeSpeaking, stopSpeaking, isSpeaking, currentIndex,
-      rate, setRate, voice, setVoice, voices, setVoices, speakText, clickTTS, setClickTTS, ttsAnnouncement, setTTSAnnouncement
-    }}>
+    <TTSContext.Provider value={{ getPageText, speakPageContent, resumeSpeaking, stopSpeaking, isSpeaking, currentIndex,
+       rate, setRate, voice, setVoice, voices, setVoices, speakText, clickTTS, setClickTTS, ttsAnnouncement, setTTSAnnouncement }}>
       {children}
     </TTSContext.Provider>
   );

@@ -157,11 +157,13 @@ const Settings = () => {
           />
         </label>
 
+        {/*
         <label className="mt-5 mb-10 block text-body font-bold">
           Password:
             <button className="ml-4 italic text-blue-900 underline underline-offset-4">Reset your password</button>
         </label>
-
+        */}
+        
         <div className="flex items-center space-x-4 mb-8">
           <p className="text-body font-bold">Activate Text-To-Speech Using Click:</p>
           {user && (
