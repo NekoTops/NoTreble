@@ -49,18 +49,18 @@ export default function Library() {
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-gray-200 ">
+    <div className="min-h-screen bg-gray-100 ">
       <Link href="/SheetMusicTools" className="flex w-fit items-center bg-black text-white text-body ml-20 px-4 py-2 rounded-lg hover:bg-white hover:text-black hover:border-2 hover:border-black">
         <TfiControlBackward className="w-1/4 h-1/4 mr-2 flex-shrink-0" /> 
         Back 
       </Link>
-      <h1 className="text-center font-bold mt-35 mb-15 text-h3 ">Music Library</h1>
+      <h1 className="text-center font-bold mt-35 mb-15 text-h2 ">Music Library</h1>
 
       <div className="flex justify-end pr-40 mb-8 ">
       <input
       type="text"
       placeholder="Search your music library..."
-      className="w-[30rem] max-w-md px-6 py-4 text-body border border-gray-400 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+      className="w-[30rem] max-w-md px-6 py-4 text-body border border-gray-500 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -69,12 +69,12 @@ export default function Library() {
         <p className="text-center text-body text-gray-500 mt-10">No results found for "{searchTerm}"</p>
       ) : (
 
-      <table className=" musiclibrary  border-b w-full shawdow-xl overflow-hidden" >
+      <table className=" musiclibrary w-full shawdow-xl px-6 py-10" >
         <tbody>
           {pieceArray(filteredFiles, 3).map((row, rowIndex) => (
             <tr key={rowIndex}>
               {row.map((file) => (
-                <td className="musiclibrarydata hover:scale-110 font-bold hover:underline shadow-lg py-12" key={file}>
+                <td className="musiclibrarydata rounded-3xl hover:scale-90 font-bold hover:underline shadow-xl py-10 " key={file}>
                 <div className="flex flex-col items-center">
                   
                   <a href={`/SheetMusicTools/MusicLibrary/MusicListener/${uid}/${file}`}>

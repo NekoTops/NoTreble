@@ -1,11 +1,22 @@
 .musiclibrary {
     justify-content: space-evenly;
     font: bold;
+    gap: 10%;
+    padding: 50px;
+    background-color: #455090 ;
+    display: table;
+    border-collapse: separate; /* Ensures borders are not collapsed */
+    border-spacing: 5px;
 }
 
 .musiclibrarydata {
-    padding-top: 5% ;
-    font-style: bold;
+    color: black;
+    text-align: center;
+    border-radius: 20px; 
+    background-color: aliceblue;
+    border: 5px solid #455090;
+    margin-top: 10%;
+    border-collapse: separate;
 }
 
 /* w-3/4 h-fit bg-gray-100 
