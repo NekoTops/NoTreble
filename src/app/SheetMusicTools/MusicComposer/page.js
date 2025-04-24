@@ -826,8 +826,8 @@ if (el) {
     <div className="p-6">
       <div className="mb-6">
         <details className="border rounded p-4 bg-gray-100">
-          <summary className="font-semibold cursor-pointer"> 🎹 Keyboard Shortcuts 🎹</summary>
-          <ul className="list-disc pl-6 mt-2 space-y-1">
+          <summary className="text-xl font-semibold cursor-pointer"> 🎹 Keyboard Shortcuts 🎹</summary>
+          <ul className="text-body list-disc pl-6 mt-2 space-y-1">
             <li><b>Note Letters (A-G):</b> Set pitch (or change selected note pitch)</li>
             <li><b>3 / 4 / 5:</b> Set octave (or change selected note octave)</li>
             <li><b>1:</b> Whole note</li>
@@ -845,8 +845,8 @@ if (el) {
           </ul>
         </details>
       </div>
-      <h1 className="text-2xl font-bold mb-4">🎼 Composer Tool</h1>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
+      <h1 className="text-body font-bold mb-4">🎼 Composer Tool</h1>
+      <div className="text-2xl grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="border p-2 rounded" />
         <input value={composer} onChange={(e) => setComposer(e.target.value)} placeholder="Composer" className="border p-2 rounded" />
         <select value={keySignature} onChange={(e) => setKeySignature(e.target.value)} className="border p-2 rounded">
@@ -861,7 +861,7 @@ if (el) {
         </select>
         <input value={bpm} type="number" onChange={(e) => setBpm(parseInt(e.target.value) || 0)} placeholder="BPM" className="border p-2 rounded" />
       </div>
-      <div className="mb-4">
+      <div className="text-xl mb-4">
         <label className="mr-2 font-semibold">Note:</label>
         {["C", "D", "E", "F", "G", "A", "B"].map((n) => (
           <button

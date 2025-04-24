@@ -110,7 +110,7 @@ export default function SheetMusicTools() {
 
   return (
     <main className="p-6">
-      <h1 className="font-bold mb-7 text-4xl">Sheet Music Converter</h1>
+      <h1 className="font-bold mb-7 text-h3">Sheet Music Converter</h1>
   
       <div className="flex flex-col lg:flex-row gap-6 bg-gray-200 p-6 rounded-2xl border-2 border-gray-400">
         {/* LEFT: File Upload + Form (Aligned vertically) */}
@@ -123,9 +123,9 @@ export default function SheetMusicTools() {
   
             {/* Enter Piece Information */}
             <div className="bg-white p-5 rounded-xl border shadow w-full max-w-md">
-              <h2 className="text-2xl font-semibold mb-4">Enter Piece Information</h2>
+              <h2 className="text-body font-semibold mb-4">Enter Piece Information</h2>
   
-              <form onSubmit={handleSubmit} className="space-y-4 text-base w-full">
+              <form onSubmit={handleSubmit} className="space-y-4 text-3xl w-full">
               <div className="w-full">
                   <label className="block mb-1 font-medium">Title:</label>
                   <SheetMusicInput
@@ -174,7 +174,7 @@ export default function SheetMusicTools() {
   
             {/* Upload Button */}
             <button
-              className="w-full max-w-md font-bold bg-[#455090] hover:bg-[#102437] text-white py-3 rounded shadow flex justify-center items-center gap-2"
+              className="w-full max-w-md font-bold bg-[#455090] hover:bg-[#102437] text-white text-body py-3 rounded shadow flex justify-center items-center gap-2"
               onClick={handleUpload}
               disabled={uploading}
             >
@@ -183,7 +183,7 @@ export default function SheetMusicTools() {
   
             {/* Upload status */}
             {uploadStatus && (
-              <p className="text-gray-600 text-sm max-w-md">{uploadStatus}</p>
+              <p className="text-gray-600 text-body max-w-md">{uploadStatus}</p>
             )}
           </div>
         </div>
@@ -205,7 +205,7 @@ export default function SheetMusicTools() {
               />
             )
           ) : (
-            <span className="text-gray-500 text-lg">No file uploaded</span>
+            <span className="text-gray-500 text-body">No file uploaded</span>
           )}
         </div>
       </div>
@@ -213,7 +213,7 @@ export default function SheetMusicTools() {
 {/* MUSIC LIBRARY BUTTON */}
 <div className="mt-8 mb-4 flex justify-center">
   <Link href="/SheetMusicTools/MusicLibrary">
-    <button className="font-bold bg-[#455090] hover:bg-[#102437] text-white px-6 py-3 rounded shadow">
+    <button className="text-body font-bold bg-[#455090] hover:bg-[#102437] text-white px-6 py-3 rounded shadow">
       Go to Music Library 🎵
     </button>
   </Link>
@@ -221,8 +221,8 @@ export default function SheetMusicTools() {
 
 {/* COMPOSING CTA SECTION */}
 <div className="bg-[#f5f5f5] mt-6 p-8 rounded-2xl shadow border border-gray-300 text-center flex flex-col items-center max-w-4xl mx-auto">
-  <h2 className="text-3xl font-bold mb-2">Start Writing Your Own Music!</h2>
-  <p className="text-lg text-gray-700 mb-6 max-w-xl">
+  <h2 className="text-h3 font-bold mb-2">Start Writing Your Own Music!</h2>
+  <p className="text-2xl text-gray-700 mb-6 max-w-xl">
     Turn your ideas into reality with our intuitive sheet music composer. Add notes, customize rhythms, and hear your composition come to life.
   </p>
 
@@ -248,7 +248,7 @@ export default function SheetMusicTools() {
       },
     }}
   >
-    <button className="text-xl font-bold bg-green-600 hover:bg-green-800 text-white px-10 py-4 rounded-xl shadow-lg transition duration-300">
+    <button className="text-body font-bold bg-green-600 hover:bg-green-800 text-white px-10 py-4 rounded-xl shadow-lg transition duration-300">
       🎼 Start Composing
     </button>
   </Link>
