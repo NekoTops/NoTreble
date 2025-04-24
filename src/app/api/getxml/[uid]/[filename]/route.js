@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function GET(req, { params }) {
     const { uid, filename } = params;
 
-    const res = await fetch(`http://3.14.250.162:3000/getxml/${uid}/${filename}`);
+    const res = await fetch(`http://3.14.250.162:443/getxml/${uid}/${filename}`);
     const xml = await res.text();
 
     return new NextResponse(xml, {

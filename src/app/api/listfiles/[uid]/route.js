@@ -10,7 +10,7 @@ export async function GET(req, { params }) {
 
   try {
     // Send the UID to the EC2 server to fetch the file list
-    const response = await fetch(`http://3.14.250.162:3000/listfiles/${uid}`);
+    const response = await fetch(`http://3.14.250.162:443/listfiles/${uid}`);
 
     if (!response.ok) {
       throw new Error('Failed to fetch files');

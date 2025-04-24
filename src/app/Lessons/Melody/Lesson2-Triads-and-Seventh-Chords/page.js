@@ -1,13 +1,45 @@
-
+import Quizviewer from "../../../component/QuizView"
 
 export default function Triads(){
 
+    const quizzes=[
+        {
+            id: 401,
+            title: "This sets broken",
+            question: "The Devs are working hard to fix this issue",
+            answer: "The root is the lowest pitch class in the adjacent clump on the circle (clockwise: the earliest note)."
+          },
+        {
+            id: 10,
+            title: "Triads - Basics and Identification",
+            question: "What is a chord in music theory?",
+            answer: "A chord is any combination of three or more pitch classes that sound simultaneously."
+          },
+          {
+            id: 11,
+            title: "Triads - Basics and Identification",
+            question: "What defines a triad?",
+            answer: "A triad is a three-note chord whose pitch classes can be arranged as stacked thirds."
+          },
+          {
+            id: 12,
+            title: "Triads - Basics and Identification",
+            question: "How can you tell if a chord is a triad using the circle of thirds?",
+            answer: "If the three pitch classes sit next to each other on the circle of thirds, it is a triad."
+          },
+          {
+            id: 13,
+            title: "Triad Roots and Qualities",
+            question: "How do you find a triad's root using the circle of thirds?",
+            answer: "The root is the lowest pitch class in the adjacent clump on the circle (clockwise: the earliest note)."
+          },
+    ];
     return (
         
         <main style={{ /*backgroundColor: '#455090e2'*/ }} >
+                
             <div className="lesson-div" >
                 <h2>Triads and seventh chords</h2>
-
                 <p>A chord is any combination of three or more pitch classes that sound simultaneously.</p>
 
                 <p>A three-note chord whose pitch classes can be arranged as thirds is called a <em>triad</em>.</p>
@@ -18,7 +50,7 @@ export default function Triads(){
 
                 <p>To quickly determine whether a three-note chord is a triad, arrange the three notes on the "circle of thirds" below. The pitch classes of a triad will always sit next to each other.</p>
 
-                <img src={'/LessonImages/circleOfThirds-triad.svg'} alt="A triad (A, C, E) on the diatonic circle of thirds." style={{ height: '100%', width: '100%' }}/>
+                <a href="/LessonImages/circleOfThirds-triad.svg"><img src={'/LessonImages/circleOfThirds-triad.svg'} alt="A triad (A, C, E) on the diatonic circle of thirds." style={{ height: '100%', width: '100%' }}/></a>
 
                 <h4>Identifying and labeling triads </h4>
 
@@ -28,7 +60,7 @@ export default function Triads(){
 
                 <p>To find a triad’s root, arrange the pitch classes on a circle of thirds (mentally or on paper). The root is the <em>lowest</em> in the three-pitch-class clump. Expressed another way, if the circle <em>ascends</em> by thirds as it moves clockwise, the root is the “earliest” note (thinking like a literal clock), and the other pitch classes come “later.”</p>
 
-                <img src={'/LessonImages/circleOfThirds-triadRTF.svg'} alt="A triad (A, C, E) on the diatonic circle of thirds." style={{ height: '100%', width: '100%' }}/>
+                <a href="/LessonImages/circleOfThirds-triadRTF.svg"><img src={'/LessonImages/circleOfThirds-triadRTF.svg'} alt="A triad (A, C, E) on the diatonic circle of thirds." style={{ height: '100%', width: '100%' }}/></a>
 
                 <p>Once you know the root, you can identify the remaining notes as the <em>third</em> of the chord (a third above the root) and the <em>fifth</em> of the chord (a fifth above the root).</p>
 
@@ -41,8 +73,7 @@ export default function Triads(){
                 <p><li>  diminished triad: m3 and d5 above the root (as in  <em>ti–re–fa</em>)</li></p>
                 <p><li>  augmented triad: M3 and A5 above the root (as in  <em>me–sol–ti</em>)</li></p>
 
-                <img src={'/LessonImages/triads.png'} alt='Four qualities of triads.' style={{ }}/>
-
+                <a href="/LessonImages/triads.png"><img src={'/LessonImages/triads.png'} alt='Four qualities of triads.' style={{ }}/></a>
                 <h3>Lead-sheet symbols</h3>
 
                 <p>A triad can be summed up by a single symbol, such as a lead-sheet chord symbol. A lead sheet symbol includes information about both root quality, as well as which pitch class occurs in the lowest voice (called the <em>bass</em> regardless of who is singing or playing that pitch).</p>
@@ -58,8 +89,7 @@ export default function Triads(){
 
                 <p>A C-major triad’s lead-sheet symbol is simply  <strong>C</strong>. A C-minor triad is  <strong>Cm</strong>. A D-sharp-diminished triad with an F-sharp in the bass is **D\#dim/F\#**. And so on.</p>
 
-                <img src={'/LessonImages/triads-LS.png'} alt="Four qualities of triads with lead-sheet symbols." style={{ }}/>
-
+                <a href="/LessonImages/triads-LS.png"><img src={'/LessonImages/triads-LS.png'} alt="Four qualities of triads with lead-sheet symbols." style={{ }}/></a>
                 <h4>Roman numerals </h4>
 
                 <p>Chords are often labeled according to their function within a key. One system for doing so uses Roman numerals to designate the scale degree of the chord’s root. Some musicians also use Roman numerals to describe the quality of the chord. Capital Roman numerals (I, II, III, etc.) are used for major triads. Lower-case Roman numerals (i, ii, iii, etc.) are used for minor triads. Lower-case Roman numerals followed by a º sign (iiº, viiº, etc.) are used for diminished triads. Capital Roman numerals followed by a <sup>+</sup> sign (V<sup>+</sup>, for example) are used for augmented triads. In general, Roman numerals are generally labeled <em>below</em> the score.</p>
@@ -107,8 +137,7 @@ export default function Triads(){
 
                 <p>Like with a triad, the pitch classes belonging to a seventh chord occupy adjacent positions (a four-pitch-class clump) on the circle of thirds. The four members of a seventh chord are the <em>root</em>, <em>third</em>, <em>fifth</em>, and <em>seventh</em>.</p>
 
-                <img src={'/LessonImages/circleOfThirds-seventhRTFS.svg'} alt="A seventh chord (A, C, E, G) on the diatonic circle of thirds." style={{ height: '100%', width: '100%' }}/>
-
+                <a href="/LessonImages/circleOfThirds-seventhRTFS.svg"><img src={'/LessonImages/circleOfThirds-seventhRTFS.svg'} alt="A seventh chord (A, C, E, G) on the diatonic circle of thirds." style={{ height: '100%', width: '100%' }}/></a>
                 <p>There are five qualities of seventh chords that appear in diatonic music: major seventh, dominant seventh, minor seventh, diminished seventh (also called fully-diminished), and half-diminished seventh. They are comprised of the following intervals above their roots:</p>
 
                 <p><li>  major seventh: M3, P5, and M7 above the root (or major triad with a major seventh)</li></p>
@@ -148,9 +177,9 @@ export default function Triads(){
                 <p><li>  VII<sup>7</sup>: dominant seventh – <em>te</em>, <em>re</em>, <em>fa</em>, <em>le</em>  </li></p>
                 <p><li>  vii°<sup>7</sup>: diminished seventh – <em>ti</em>, <em>re</em>, <em>fa</em>, <em>le</em></li></p>
 
-                <p>Note that major-seventh and dominant-seventh chords have the same Roman numeral nomenclature. The difference is discerned from the context of the key.</p>  
+                <p>Note that major-seventh and dominant-seventh chords have the same Roman numeral nomenclature. The difference is discerned from the context of the key.</p> 
+                <Quizviewer quizzes={quizzes}/>
             </div>
         </main>
-
     );
 }

@@ -7,7 +7,7 @@ export async function POST(req) {
   // Perform the conversion logic here
   try {
     // Forward the conversion request to EC2
-    const convertResponse = await fetch("http://3.14.250.162:3000/convert", {
+    const convertResponse = await fetch("http://3.14.250.162:443/convert", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

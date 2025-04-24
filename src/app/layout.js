@@ -1,5 +1,5 @@
+// app/layout.js
 import { Geist, Geist_Mono } from "next/font/google";
-import styles from "./globals.css";
 import "./globals.css";
 import { Route, Routes } from "react-router-dom";
 import NavBar from "./component/NavBar";
@@ -26,16 +26,15 @@ export const metadata = {
 function Header() {
   return (
     <>
-      <NavBar className="nav-bar"/>
+      <NavBar className="nav-bar" />
     </>
-  )
+  );
 }
 
-//update
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body>
         <TTSProvider>
           <TextSizeProvider>
             <Header />

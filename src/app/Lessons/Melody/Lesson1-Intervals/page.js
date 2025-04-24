@@ -1,6 +1,63 @@
-
+import Quizviewer from "../../../component/QuizView"
 
 export default function Intervals(){
+
+    const quizzes=[
+        {
+            id: 1,
+            title: "Intervals and Dyads Introduction",
+            question: "What is a dyad in music?",
+            answer: "A dyad is a pair of pitches sounding together, essentially a two-note chord."
+          },
+          {
+            id: 2,
+            title: "Intervals and Dyads Introduction",
+            question: "What is the difference between an interval and a dyad?",
+            answer: "An interval refers to the distance between two pitches, while a dyad is a pair of pitches sounding together, often referred to by the interval between them."
+          },
+          {
+            id: 3,
+            title: "Intervals and Dyads Introduction",
+            question: "How is the term \"interval\" used in both a theoretical and practical context in music?",
+            answer: "The term \"interval\" refers both to the distance between two pitches on a scale and to a dyad whose pitches are separated by that distance. This allows for the term to describe both theoretical distance and practical musical chords."
+          },
+          {
+            id: 4,
+            title: "Chromatic and Diatonic Intervals",
+            question: "How are chromatic intervals measured on the keyboard?",
+            answer: "Chromatic intervals are measured by counting the number of half-steps (semitones) between two pitches."
+          },
+          {
+            id: 5,
+            title: "Chromatic and Diatonic Intervals",
+            question: "How would you determine the diatonic interval from C4 to E4?",
+            answer: "Count the number of different letter names (C, D, E), including both C and E, which gives you a diatonic interval of a third."
+          },
+          {
+            id: 6,
+            title: "Chromatic and Diatonic Intervals",
+            question: "Why is it necessary to know both the generic and chromatic interval to find the specific interval between two pitches, such as C4–E4?",
+            answer: "The generic interval identifies the broad category (e.g., third), but the chromatic interval gives the exact number of semitones, which allows you to determine the specific quality (e.g., major, minor) of the interval."
+          },
+          {
+            id: 7,
+            title: "Compound Intervals, Inversions, and Methods",
+            question: "What is a compound interval?",
+            answer: "A compound interval is any interval larger than an octave."
+          },
+          {
+            id: 8,
+            title: "Compound Intervals, Inversions, and Methods",
+            question: "What is the relationship between C4-E4 and C4-E5, and how is it classified?",
+            answer: "C4-E4 is a major third, and C4-E5 is a major tenth. The tenth is called a compound third because it functions the same as the major third but spans an octave."
+          },
+          {
+            id: 9,
+            title: "Compound Intervals, Inversions, and Methods",
+            question: "How does interval inversion work, and what are the three key relationships between inversions, such as C4-E4 and E4-C5?",
+            answer: "Interval inversion involves switching the order of the notes while maintaining the same pitch classes. The three key relationships are:\n\nThe chromatic intervals add up to 12.\n\nThe generic intervals add up to 9.\n\nMajor intervals invert to minor, augmented to diminished, and perfect remains perfect."
+          }
+    ];
 
     return (
         
@@ -84,7 +141,7 @@ export default function Intervals(){
 
                 <p>Again, take C4–E4 (major third) and E4–C5 (minor sixth). These two dyads have the same two pitch classes, but one has C on bottom and E on top, while the other has E on bottom and C on top. Thus, they are inversions of each other.</p>
 
-                <img src={'/LessonImages/inversion.png'} alt="Inversion relationship: major third and minor sixth." style={{ }}/>
+                <a href="/LessonImages/inversion.png"><img src={'/LessonImages/inversion.png'} alt="Inversion relationship: major third and minor sixth." style={{ }}/></a>
 
                 <p>Three relationships exhibited by these two dyads hold for all interval inversions. </p>
 
@@ -104,7 +161,7 @@ export default function Intervals(){
 
                 <p>There are several methods for learning intervals. Choose your favorite:</p>
 
-                <p>- <a href ="whiteKeyMethod.html">The white-key method</a></p>
+                <p>-The white-key method</p>
 
 
 
@@ -148,6 +205,7 @@ export default function Intervals(){
                 <p><li>All augmented and diminished intervals </li>(including those that are enharmonically equivalent to consonant intervals, such as A2 and A1)  </p>
                 <p><li>All sevenths</li></p>
                 <p><li>Perfect fourths</li></p> 
+                <Quizviewer quizzes={quizzes}/>
             </div>
         </main>
 

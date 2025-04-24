@@ -1,6 +1,62 @@
+import Quizviewer from "../../../component/QuizView"
 
 export default function Meter(){
-
+    const quizzes=[
+        {
+            id: 19,
+            title: "Meter Basics & Classification",
+            question: "What are the two main ways meter is classified?",
+            answer: "Simple vs. compound and duple vs. triple vs. quadruple."
+          },
+          {
+            id: 20,
+            title: "Meter Basics & Classification",
+            question: "How do simple and compound meters differ?",
+            answer: "Simple meters divide each beat into two; compound meters divide each beat into three."
+          },
+          {
+            id: 21,
+            title: "Meter Basics & Classification",
+            question: "How does the classification of duple, triple, or quadruple relate to conducting patterns?",
+            answer: "Conducting patterns are determined by how beats group in each measure: 2 (duple), 3 (triple), or 4 (quadruple)."
+          },
+          {
+            id: 22,
+            title: "Time Signatures and Meter Types",
+            question: "What does the top number of a time signature indicate?",
+            answer: "The type of meter."
+          },
+          {
+            id: 23,
+            title: "Time Signatures and Meter Types",
+            question: "Which top number represents compound triple meter?",
+            answer: "9"
+          },
+          {
+            id: 24,
+            title: "Time Signatures and Meter Types",
+            question: "Why is the top number alone sufficient to identify the meter type?",
+            answer: "Because each top number uniquely corresponds to one of the six standard meters in Western music."
+          },
+          {
+            id: 25,
+            title: "Bottom Numbers & Beat Values",
+            question: "In simple meter, what does the bottom number of a time signature represent?",
+            answer: "The note that gets one beat."
+          },
+          {
+            id: 26,
+            title: "Bottom Numbers & Beat Values",
+            question: "In compound meter, what does the bottom number represent?",
+            answer: "The note that equals one division of the beat."
+          },
+          {
+            id: 27,
+            title: "Bottom Numbers & Beat Values",
+            question: "Why is the beat always dotted in compound meter?",
+            answer: "Because the beat is divided into three equal parts, so the beat duration is three times that of the division note."
+          },
+    ];
     return (
         
         <main style={{ /*backgroundColor: '#455090e2'*/ }} >
@@ -88,6 +144,7 @@ export default function Meter(){
 
                 <iframe src="https://embed.spotify.com/?uri=spotify:track:6M1Eo5wuTl8f5qbpLCuph0" style={{ width: "300", height: "80", frameborder: "0", allowtransparency: "true" }}></iframe><p className="caption">St. Matthew Passion, No. 1, Chorus, "Kommt, ihr Töchter, helft mir klagen," J.S. Bach</p>
 
+                <Quizviewer quizzes={quizzes}/>
             </div>
         </main>
 

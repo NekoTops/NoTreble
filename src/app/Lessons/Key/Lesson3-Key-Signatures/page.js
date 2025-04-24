@@ -1,7 +1,65 @@
-
+import Quizviewer from "../../../component/QuizView"
 
 
 export default function Key(){
+
+    const quizzes=[
+        {
+            id: 19,
+            title: "Purpose of Key Signatures",
+            question: "Why do composers use key signatures?",
+            answer: "To avoid writing out accidentals repeatedly and to indicate which notes are consistently sharp or flat."
+          },
+          {
+            id: 20,
+            title: "Purpose of Key Signatures",
+            question: "How does a key signature help a performer reading a melody?",
+            answer: "It tells the performer which pitch classes are sharp or flat throughout the piece, reducing clutter in notation."
+          },
+          {
+            id: 21,
+            title: "Purpose of Key Signatures",
+            question: "How would a melody in D major be affected if no key signature were used?",
+            answer: "The notes F and C would need to be marked with accidentals every time, making the score harder to read and write."
+          },
+          {
+            id: 22,
+            title: "Circle of Fifths & Mnemonics",
+            question: "What is the circle of fifths used for?",
+            answer: "To identify the key signature of any major or minor key with up to seven sharps or flats."
+          },
+          {
+            id: 23,
+            title: "Circle of Fifths & Mnemonics",
+            question: "What is the mnemonic device for the order of sharps and flats?",
+            answer: "Father Charles Goes Down And Ends Battle."
+          },
+          {
+            id: 24,
+            title: "Circle of Fifths & Mnemonics",
+            question: "How do you use the mnemonic to identify flats in A-flat major?",
+            answer: "Read the mnemonic backwards to get: B, E, A, D — the four flats in A-flat major."
+          },
+          {
+            id: 25,
+            title: "Minor Keys & Clef Usage",
+            question: "What is a relative key?",
+            answer: "A major and minor key that share the same key signature."
+          },
+          {
+            id: 26,
+            title: "Minor Keys & Clef Usage",
+            question: "What is the relative minor of C major, and how many accidentals do they have?",
+            answer: "A minor is the relative minor of C major, and both have no sharps or flats."
+          },
+          {
+            id: 27,
+            title: "Minor Keys & Clef Usage",
+            question: "How does knowing key signatures across clefs (e.g. treble, bass, alto, tenor) help musicians?",
+            answer: "It allows performers and composers to correctly write and interpret music regardless of the clef, ensuring accurate pitch reading across different instruments and voices."
+          }
+    ];
+
 
     return (
         
@@ -55,6 +113,7 @@ export default function Key(){
             <a href="/LessonImages/flatsTenor.png"><img src="/LessonImages/flatsTenor.png"/></a>
             <a href="/LessonImages/flatsBass.png"><img src="/LessonImages/flatsBass.png"/></a>
 
+            <Quizviewer quizzes={quizzes}/>
             </div>
         </main>
 

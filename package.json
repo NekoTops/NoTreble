@@ -11,12 +11,18 @@
   "dependencies": {
     "@tonejs/midi": "^2.0.28",
     "browserslist": "^4.24.4",
+    "build": "^0.1.4",
     "caniuse-lite": "^1.0.30001701",
     "cors": "^2.8.5",
     "eslint-config-next": "^15.3.1",
+    "express": "^5.1.0",
+    "fast-xml-parser": "^5.2.0",
     "firebase": "^11.4.0",
+    "midi-player-js": "^2.0.16",
+    "multer": "^1.4.5-lts.2",
     "next": "^15.3.1",
     "opensheetmusicdisplay": "^1.9.0",
+    "osmd-audio-player": "^0.6.4",
     "raw-loader": "^4.0.2",
     "raw.macro": "^0.7.0",
     "react": "^19.1.0",
@@ -25,9 +31,14 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.3.0",
     "react-text-to-speech": "^1.4.3",
-    "tone": "^15.0.4"
+    "soundfont-player": "^0.12.0",
+    "tone": "^15.0.4",
+    "verovio": "^5.1.0",
+    "vexflow": "^5.0.0",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
+    "globals": "^16.0.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1"
   }

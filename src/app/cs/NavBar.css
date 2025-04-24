@@ -10,6 +10,7 @@
     box-sizing: border-box;
     justify-content: center;
     overflow:auto;
+    scrollbar-width:thin;
 }
 .nav-list{
     /* align-self: center; */
@@ -47,6 +48,7 @@
     margin-right: 20px;
     margin-left: 5%;
     gap: 5;
+    z-index: 10;
 }
 .bubble{
     background-color: var(--background);
@@ -82,3 +84,23 @@
         font-weight:500;
     }   
 }
+
+.nav-list > li {
+    position: relative;
+    z-index: 1; 
+    margin-top: 2px;
+    box-sizing: border-box;
+    margin-inline: 22px;
+  }
+  
+
+  .nav-selector {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);  
+    height: 48px;  
+    border-radius: 40px;  
+    background-color: #FAF9F6;  
+    transition: all 0.3s ease;
+    z-index: 0;
+  }  

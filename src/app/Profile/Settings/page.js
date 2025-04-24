@@ -157,11 +157,13 @@ const Settings = () => {
           />
         </label>
 
+        {/*
         <label className="mt-5 mb-10 block text-body font-bold">
           Password:
-            <button className="ml-4 italic text-blue-900 underline underline-offset-4 ">Reset your password</button>
+            <button className="ml-4 italic text-blue-900 underline underline-offset-4">Reset your password</button>
         </label>
-
+        */}
+        
         <div className="flex items-center space-x-4 mb-8">
           <p className="text-body font-bold">Activate Text-To-Speech Using Click:</p>
           {user && (
@@ -171,8 +173,8 @@ const Settings = () => {
                 clickTTS ? "bg-green-500" : "bg-red-500"
               }`}
             >
-              <span className="text-white font-bold text-body flex-1 text-center">
-                {clickTTS ? "ON" : "OFF"}
+              <span className="text-white font-bold text-body flex-1 text-center uppercase">
+                {clickTTS ? "on" : "off"} 
               </span>
             </button>
           )}
@@ -183,15 +185,15 @@ const Settings = () => {
           <p className="text-body font-bold">Text Sizes: </p>
           <button 
             onClick={() => handleTextSizeChange("medium")}
-            className={`p-2 m-2 font-bold text-body border rounded-lg hover:bg-gray-500 ${newTextSize === "medium" ? "bg-green-500 text-white" : "bg-white text-black"}`}
+            className={`uppercase p-2 m-2 font-bold text-body border rounded-lg hover:bg-gray-500 ${newTextSize === "medium" ? "bg-green-500 text-white" : "bg-white text-black"}`}
           >
-            MEDIUM
+            medium
           </button>
           <button 
             onClick={() => handleTextSizeChange("large")}
-            className={`p-2 m-2 font-bold text-body border rounded-lg hover:bg-gray-500 ${newTextSize === "large" ? "bg-green-500 text-white" : "bg-white text-black"}`}
+            className={`uppercase p-2 m-2 font-bold text-body border rounded-lg hover:bg-gray-500 ${newTextSize === "large" ? "bg-green-500 text-white" : "bg-white text-black"}`}
           >
-            LARGE
+            large
           </button>
         </div>
 

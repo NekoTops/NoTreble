@@ -13,7 +13,7 @@ export async function POST(req) {
     const forwardFormData = new FormData();
     forwardFormData.append("file", file);
 
-    const ec2Response = await fetch("http://3.14.250.162:3000/upload", {
+    const ec2Response = await fetch("http://3.14.250.162:443/upload", {
       method: "POST",
       body: forwardFormData,
     });

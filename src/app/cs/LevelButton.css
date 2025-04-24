@@ -29,7 +29,7 @@
         width:70%;
         /* font-size: 1rem; */
         font-size: var(--h2-text-size);
-        padding-top: 0.5px;
+       /* padding-top: 0.5px;*/
     }
 }
 @media (min-width: 377px) and (max-width: 480px) {
@@ -42,7 +42,7 @@
         width:70%;
         /* font-size: 1rem; */
         font-size: var(--body-text-size);
-        padding-top: 0.5px;
+       /* padding-top: 0.5px;*/
     }
 }
 
@@ -52,7 +52,7 @@
         height: 8vh;
         width: 75%;
         /* font-size: 1.5rem; */
-        padding-top: 0.5px;
+        /*padding-top: 0.5px;*/
     }
 }
 

@@ -1,8 +1,63 @@
-
+import Quizviewer from "../../../component/QuizView"
 
 
 export default function Scales(){
-
+    const quizzes=[
+        {
+            id: 10,
+            title: "Scales, Chromatic, and Major Scales",
+            question: "What is a scale in music theory?",
+            answer: "A succession of pitches ascending or descending in steps."
+          },
+          {
+            id: 11,
+            title: "Scales, Chromatic, and Major Scales",
+            question: "What is the pattern of whole and half steps in a major scale?",
+            answer: "W-W-H-W-W-W-H."
+          },
+          {
+            id: 12,
+            title: "Scales, Chromatic, and Major Scales",
+            question: "How does the chromatic scale differ from a major scale in terms of pitch organization?",
+            answer: "The chromatic scale consists entirely of half steps and includes every pitch in an octave, while a major scale follows a specific whole/half step pattern and uses only seven pitch classes."
+          },
+          {
+            id: 13,
+            title: "Scale Degrees and Solfège",
+            question: "What is a scale degree?",
+            answer: "A pitch's position within a specific scale."
+          },
+          {
+            id: 14,
+            title: "Scale Degrees and Solfège",
+            question: "What solfège syllables are typically used to represent scale degrees in movable-do solfège?",
+            answer: "Do, Re, Mi, Fa, Sol, La, Ti (and variations like Le, Te in minor)."
+          },
+          {
+            id: 15,
+            title: "Scale Degrees and Solfège",
+            question: "Why is movable-do solfège useful for identifying scale degrees in different keys?",
+            answer: "Because it assigns solfège syllables based on function within the scale rather than fixed pitch, helping with transposition and aural training."
+          },
+          {
+            id: 16,
+            title: "Minor Scales (Natural, Harmonic, Melodic)",
+            question: "What is the pattern of whole and half steps in a natural minor scale?",
+            answer: "W-H-W-W-H-W-W."
+          },
+          {
+            id: 17,
+            title: "Minor Scales (Natural, Harmonic, Melodic)",
+            question: "How does a harmonic minor scale differ from the natural minor scale?",
+            answer: "The seventh scale degree is raised by a semitone in the harmonic minor scale."
+          },
+          {
+            id: 18,
+            title: "Minor Scales (Natural, Harmonic, Melodic)",
+            question: "Why do composers modify the minor scale when writing melodies or harmonies?",
+            answer: "To create stronger melodic motion or harmonic resolution, such as avoiding the augmented second between le and ti or achieving closure between ti and do."
+          }
+    ];
     return (
         
         <main style={{ /*backgroundColor: '#455090e2'*/ }} >
@@ -56,7 +111,7 @@ export default function Scales(){
                 <a href="/LessonImages/sdsf-melodicMinorDesc.png"><img src="/LessonImages/sdsf-melodicMinorDesc.png" alt="The melodic minor scale when descending" /></a>
 
                 <p>Truth be told, most composers don't really think about three different "forms" of the minor scale. The <em>harmonic minor</em> scale simply represents composers' tendency to use <em>ti</em> when building harmonies that include the seventh scale degree in the minor mode. Likewise, the <em>melodic minor</em> scale is derived from composers' desire to avoid the melodic augmented second interval (more on this in the <a href ="/Lessons/Melody/Lesson1-Intervals"><u>intervals</u></a> section) between <em>le</em> and <em>ti</em> (and some chose not to avoid this!). In reality, there is only one "version" of the minor scale. Context determines when a composer might use <em>la</em> and <em>ti</em> when writing music in a minor key. </p>
-
+                <Quizviewer quizzes={quizzes}/>
             </div>
         </main>
 

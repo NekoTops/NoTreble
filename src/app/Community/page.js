@@ -31,6 +31,19 @@ export default function Community() {
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(10);
   const [isTagPopupOpen, setIsTagPopupOpen] = useState(false);
+  const [selectedTags, setSelectedTags] = useState([]);
+
+
+const toggleTag = (tag) => {
+  setSelectedTags(prev =>
+    prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+  );
+};
+
+
+const removeTag = (tagToRemove) => {
+  setSelectedTags(prev => prev.filter(tag => tag !== tagToRemove));
+};
 
 
   const handleTagPopup = () => {
@@ -218,13 +231,60 @@ export default function Community() {
                 placeholder="Post Title"
                 className="w-full p-2 border rounded mb-4"
               />
-              <input
-                type="text"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                placeholder="Tags (comma-separated)"
-                className="w-full p-2 border rounded mb-4"
-              />
+{/* Existing tag selection list */}
+<div style={{ maxHeight: '100px', overflowY: 'auto', border: '1px solid #ccc', padding: '5px', marginBottom: '10px' }}>
+  {allTags.map((tag, index) => (
+    <button
+      key={index}
+      onClick={() => toggleTag(tag)}
+      style={{
+        margin: '3px',
+        padding: '5px 10px',
+        backgroundColor: selectedTags.includes(tag) ? '#333' : '#eee',
+        color: selectedTags.includes(tag) ? '#fff' : '#000',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer'
+      }}
+    >
+      {tag}
+    </button>
+  ))}
+</div>
+
+{/* New tag input */}
+<input
+  type="text"
+  value={tags}
+  onChange={(e) => setTags(e.target.value)}
+  placeholder="Add new tags (comma-separated)"
+  style={{
+    width: '100%',
+    padding: '8px',
+    marginTop: '10px',
+    marginBottom: '10px',
+    boxSizing: 'border-box',
+    border: '1px solid #ccc',
+    borderRadius: '5px'
+  }}
+/>
+
+
+{/* Display selected tags */}
+<div style={{ marginTop: '10px' }}>
+  {selectedTags.map((tag, index) => (
+    <span key={index} style={{ display: 'inline-block', padding: '5px 10px', margin: '3px', backgroundColor: '#ddd', borderRadius: '5px' }}>
+      {tag}
+      <button
+        onClick={() => removeTag(tag)}
+        style={{ marginLeft: '5px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+      >
+        ×
+      </button>
+    </span>
+  ))}
+</div>
+
               <input
                 type="file"
                 accept="image/*"
@@ -338,7 +398,7 @@ export default function Community() {
                   alt="Profile"
                   className="w-10 h-10 rounded-full mr-4"
                 />
-                <div className="flex-1">
+                <div className="flex-1 leading-[1.5]">
                   <p className="font-bold text-xl">@{post.username || "Anonymous"}</p>
                   <p className="mt-4 mb-4 font-bold text-body">{post.title}</p>
                   <p className="mt-5 mb-5 text-body">{post.content}</p>
@@ -446,14 +506,14 @@ export default function Community() {
             disabled={currentPage === 1}
             className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg"
           >
-            Previous
+            ← Previous
           </button>
           <button
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage * postsPerPage >= filteredPosts.length}
             className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg ml-4"
           >
-            Next
+            Next →
           </button>
         </div>
       </div>

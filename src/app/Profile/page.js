@@ -81,7 +81,7 @@ const Profile = () => {
   return (
     <span>
         {user ? (
-          <div className="w-3/4 min-h-screen bg-gray-100 flex flex-col md:flex-row justify-center mx-auto my-20 rounded-xl border-2 border-black-100 drop-shadow-md">
+          <div className="w-3/4 min-h-screen bg-gray-100 flex flex-wrap items-center justify-center mx-auto my-20 rounded-xl border-2 border-black-100 drop-shadow-md">
             <div className="w-full md:w-1/2 flex flex-col items-center my-auto">
               <img
                 src={user.profilePic}
@@ -89,7 +89,7 @@ const Profile = () => {
                 className="w-[200px] h-[200px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[400px] lg:h-[400px] max-w-[500px] max-h-[500px] rounded-full border-4 border-black object-cover"
                 onError={(e) => (e.target.src = "/defaultprofile.png")}
               />
-              <div className="flex flex-row items-center mt-10 gap-2">
+              <div className="flex flex-wrap items-center mt-10 gap-2">
                 <label className="cursor-pointer text-body bg-white text-black px-4 py-2 rounded-md hover:bg-gray-500 border-2 border-dashed border-black">
                   Choose Image
                   <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
@@ -109,13 +109,13 @@ const Profile = () => {
               <p className="text-body text-gray-600 pb-10">{user.username}</p>
               <p className="text-h3 text-black"><strong>Email:</strong></p>
               <p className="text-body text-gray-600 pb-10">{user.email}</p>
-              <div className="flex flex-row items-center mt-10 space-x-20">
-                <NavLink href="/Profile/Settings" className="text-body rounded-md bg-[#455090] px-[30px] py-[10px] font-semibold shadow-[0_4px_6px_-1px_rgba(16,36,55,0.1)] text-[#ededed] hover:bg-[#102437]">
+              <div className="flex flex-wrap items-center justify-start gap-4 mt-8 w-full">
+                <NavLink href="/Profile/Settings" className="text-body rounded-md bg-[#455090] px-6 py-2 font-semibold shadow-md text-white hover:bg-[#102437] w-full sm:w-auto text-center">
                   Settings
                 </NavLink>
                 <button
                   onClick={handleLogout}
-                  className="text-body px-[30px] py-[10px] bg-red-500 text-white rounded-md font-semibold shadow-[0_4px_6px_-1px_rgba(16,36,55,0.1)] text-[#ededed] hover:bg-red-600"
+                  className="text-body px-6 py-2 bg-red-500 text-white rounded-md font-semibold shadow-md hover:bg-red-600 w-full sm:w-auto text-center"
                 >
                   Logout
                 </button>
