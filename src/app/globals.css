@@ -18,11 +18,11 @@
 }
 
 .large-text-size {
-  --body-text-size: 50px; 
+  --body-text-size: 45px; 
   --h2-text-size: 100px;
   --h3-text-size: 65px;
   --h4-text-size: 58px;
-  --custom-text-size: 35px;
+  --custom-text-size: 25px;
   --line-space: 75px;
 }
 

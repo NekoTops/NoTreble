@@ -9,7 +9,6 @@ import { auth } from "@/firebaseConfig";
 import { getUserProfile, updateUserProfile } from "@/lib/firebase/auth";
 import { FaCirclePause } from "react-icons/fa6";
 import { FaCirclePlay } from "react-icons/fa6";
-import { HiMiniSpeakerWave } from "react-icons/hi2";
 import { MdSettingsSuggest } from "react-icons/md";
 
 export default function TTSBar() {
@@ -20,16 +19,26 @@ export default function TTSBar() {
   const [newTTS, setTTS] = useState(false);
   const { clickTTS, setClickTTS } = useTTS(); // Use the TTS context
   const [buttonClicked, setButtonClicked] = useState(false); // State to track if the button is clicked
-  const [isHovered, setIsHovered] = useState(false);
   const [showOptions, setShowOptions] = useState(false);  // State for the expanding button   
   const { speakPageContent, speakText, stopSpeaking, isSpeaking, currentIndex, resumeSpeaking, rate, setRate, voice, setVoice, voices, setVoices, ttsAnnouncement, setTTSAnnouncement } = useTTS(); // Use the TTS context
   const menuRef = useRef();
     
   useEffect(() => {
-    // Ensure the voices are populated from the SpeechSynthesis API
-    const allVoices = window.speechSynthesis.getVoices();
-    setVoices(allVoices); // Set the available voices in the TTS context
+    // Ensure that all voices are populated to the list
+    const loadVoices = () => {
+      const allVoices = window.speechSynthesis.getVoices();
+      setVoices(allVoices);
+    };
+  
+    // Listen to voices change event
+    loadVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+  
+    return () => {
+      window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+    };
   }, []);
+  
 
   useEffect(() =>{
     const handleClickOutside = (e) => {
@@ -57,18 +66,22 @@ export default function TTSBar() {
         setUser({
           ...profileData,
         });
-        setTTS(profileData.clickTTS || true); //set initial TTS 
-
+        setTTS(profileData.clickTTS || true);
+  
         // Fetch the text size setting to work with global CSS
         const storedTextSize = profileData.textSize || "medium";
         setTextSize(storedTextSize);
+        
         document.body.classList.toggle("large-text-size", storedTextSize === "large");
         document.body.classList.toggle("medium-text-size", storedTextSize === "medium");
+        
+        document.documentElement.style.setProperty('--custom-text-size', storedTextSize === 'large' ? '18px' : '14px');
+        
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
     });
-
+  
     return () => unsubscribe();
   }, [router]);
 
@@ -87,7 +100,7 @@ export default function TTSBar() {
       stopSpeaking();  // Stop speech if currently speaking
     } else {
       // Start from the beginning, or resume from the last word
-      if (currentIndex !== null) {
+      if (currentIndex != null && currentIndex >= 0) {
         resumeSpeaking(); // Resume if we have a current index
       } else {
         speakPageContent(); // Start speaking if no previous index
@@ -146,6 +159,14 @@ export default function TTSBar() {
   
       console.log(`TTS set to ${toggledTTS ? "ON" : "OFF"}`);
       setClickTTS(toggledTTS);  // Update local state for TTS
+
+      if (toggledTTS) {
+        speakText("Click to speak on");
+      }
+      else {
+        speakText("Click to speak off");
+      }
+
     } catch (error) {
       console.error("Error updating TTS setting:", error);
     }
@@ -155,13 +176,15 @@ export default function TTSBar() {
     // Toggle the text size classes on the body
     document.body.classList.toggle("large-text-size", newTextSize === "large");
     document.body.classList.toggle("medium-text-size", newTextSize === "medium");
-  
-    // Set the custom text size variable
-    document.documentElement.style.setProperty('--custom-text-size', newTextSize === 'large' ? '18px' : '14px');
-  
+    
     // Update the local state
     setTextSize(newTextSize);
-  
+    if (newTextSize == "medium") {
+      speakText("Text size set to medium");
+    }
+    else {
+      speakText("Text size set to large");
+    }
     // Update the text size preference in Firestore
     const currentUser = auth.currentUser;
     if (currentUser) {
@@ -209,22 +232,22 @@ export default function TTSBar() {
                 }}
               >
                 {!isSpeaking ? (
-                  <FaCirclePlay size={40} color={isHovered ? "#303E60" : "#455090"} />
+                  <FaCirclePlay size={40} color="#303E60" />
                 ) : (
-                  <FaCirclePause size={40} color={isHovered ? "#303E60" : "#455090"} />
+                  <FaCirclePause size={40} color="#303E60"/>
                 )}
               </div>
 
               {/* Speed Dropdown */}
-              <div className="mr-5 text-[var(--custom-text-size)]">
+              <div className="mr-5 text-custom">
                 <label>Speed</label>
-                <select
+                <select 
                   value={rate}
                   onChange={(e) => {
                     e.stopPropagation();
                     handleRate(e);
                   }}
-                  className="content-center text-center text-[var(--custom-text-size)] bg-gray-300 shadow"
+                  className="content-center text-center bg-gray-300 shadow"
                   title={`Speed: ${rate}`}
                 >
                   <option value="0.5">0.5</option>
@@ -237,7 +260,7 @@ export default function TTSBar() {
               </div>
 
               {/* Voice Dropdown */}
-              <div className="text-[var(--custom-text-size)]">
+              <div className="text-custom">
                 <label>Voice</label>
                 <select
                   className="bg-gray-300 shadow"
@@ -255,38 +278,38 @@ export default function TTSBar() {
               </div>
           </div>
           {/* Option to toggle the page announcement*/}
-          <div>
-            <label htmlFor="announcementToggle" className="text-[var(--custom-text-size)]">Announce page</label>
+          <div className="ignore-item flex text-custom items-center space-x-2 mt-4">
+            <label htmlFor="announcementToggle" className="text-custom">Announce page</label>
             <input 
               type="checkbox"
               id="announcementToggle"
               checked={ttsAnnouncement}
               onChange={(e) => handleAnnouncement(e)}
-              className="tts-announcement w-6 h-6 m-4"
+              className="tts-announcement w-6 h-6"
             />
           </div>
-          <div className="flex items-center space-x-2">
-            <p className="text-[var(--custom-text-size)]">Click to Speak:</p>
+          <div className="ignore-item flex text-custom items-center space-x-2 mt-4">
+            <label htmlFor="clickToSpeakToggle" className="text-custom">
+              Click to Speak:
+            </label>
             {user && (
-              <button
-                onClick={handleToggle}
-                className={`p-2 m-1 flex items-center justify-${clickTTS ? "end" : "start"} rounded-md px-2 transition-colors ${
-                  clickTTS ? "bg-green-500" : "bg-red-500"
-                }`}
-              >
-                <span className="text-[var(--custom-text-size)] font-bold text-2xl text-center uppercase">
-                  {clickTTS ? "on" : "off"} 
-                </span>
-              </button>
+              <input
+                id="clickToSpeakToggle"
+                type="checkbox"
+                checked={clickTTS}
+                onChange={handleToggle}
+                className="w-6 h-6"
+
+              />
             )}
           </div>
           {/* Text Size Buttons */}
-          <div className="mt-3 space-y-2">
-            <p className="text-[var(--custom-text-size)]">Text Sizes:</p>
-            <div className="flex items-center space-x-4">
+          <div className="ignore-item flex text-custom items-center space-x-4 mt-4">
+            <p>Text Sizes:</p>
+            <div className="space-x-2">
               <button
                 onClick={() => handleTextSizeChange("medium")}
-                className={`uppercase p-2 font-bold text-[var(--custom-text-size)] border rounded-lg ${
+                className={`uppercase px-3 py-2 font-bold border rounded-lg ${
                   newTextSize === "medium" ? "bg-green-500 text-white" : "bg-white text-black"
                 }`}
               >
@@ -294,7 +317,7 @@ export default function TTSBar() {
               </button>
               <button
                 onClick={() => handleTextSizeChange("large")}
-                className={`uppercase p-2 font-bold text-[var(--custom-text-size)] border rounded-lg ${
+                className={`uppercase px-3 py-1 font-bold text-[var(--custom-text-size)] border rounded-lg ${
                   newTextSize === "large" ? "bg-green-500 text-white" : "bg-white text-black"
                 }`}
               >
