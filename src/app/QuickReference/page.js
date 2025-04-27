@@ -1,4 +1,5 @@
 "use client";
+import { set } from "firebase/database";
 import { useState }from "react";
 
 //Array of all terms and definitions
@@ -563,11 +564,12 @@ export default function Reference(){
 
     //This keeps track of how terms are sorted and updates the page when the state changes
     const [sort, setSort] = useState(1);
-
+    const [filteredTerms, setFilteredTerms] = useState([]);
+    const [noMatch, setnoMatch] = useState(0);
     //Sort terms by group/category
-    function SortByGroup () {
+    function SortByGroup (termlist) {
         //compare group and sort
-        return terms.sort((a,b) => a.group.localeCompare(b.group)).map((term, index) => {
+        return termlist.sort((a,b) => a.group.localeCompare(b.group)).map((term, index) => {
             //render with group as header if it is the first term in the group
             if (index === 0 || term.group !== terms[index - 1].group) {
                 return <div className="reference-div" key={term.term}>
@@ -588,9 +590,9 @@ export default function Reference(){
     }
 
     //Sort terms alphabetically
-    function SortAlpha () {
+    function SortAlpha (termlist) {
         //sort terms alphabetically and render them with term group and definition
-        return terms.sort((a,b) => a.term.localeCompare(b.term)).map((term, index) => {
+        return termlist.sort((a,b) => a.term.localeCompare(b.term)).map((term, index) => {
             return <div className="reference-div" key={term.term}>
                 <h4>{term.term}</h4>
                 <p><strong>{term.group}</strong></p>
@@ -601,19 +603,49 @@ export default function Reference(){
 
     //Render based on the value of sort, 1 for group, 2 for alphabetical
     function renderSort() {
-        if (sort == 1) {
-            console.log("switch to group");
-            return SortByGroup();
+        //If there is something in the search bar, render the filtered terms by group or alphabetically
+        if (filteredTerms.length > 0) {
+            if (sort == 1) {
+                return SortByGroup(filteredTerms);
+            }
+            else if (sort == 2) {
+               return SortAlpha(filteredTerms); 
+            }
         }
-        else if (sort == 2) {
-            console.log("switch to alpha");
-            return SortAlpha(); 
+        //If there is nothing in the search bar, render the full list of terms by group or alphabetically
+        else if (noMatch == 1) {
+            return <div className="reference-div"><h4>No Terms Found</h4></div>;
+        }
+        else {
+            if (sort == 1) {
+                return SortByGroup(terms);
+            }
+            else if (sort == 2) {
+                return SortAlpha(terms); 
+            }
         }
     }
     return (
         //sort buttons set sort to the appropriate value and changes the state
         <div className="reference-title">
             <h2>Reference Guide</h2>
+            <div className="term-search">
+                <input
+                    type="text"
+                    placeholder="Search Terms..."
+                    onChange={(a) => {
+                        const query = a.target.value.toLowerCase();
+                        setFilteredTerms(terms.filter((term) => term.term.toLowerCase().includes(query) || term.group.toLowerCase().includes(query) || term.definition.toLowerCase().includes(query)));
+                        //If there are no terms that match the search, set noMatch to 1, else set it to 0
+                        //Used to render the "no terms found" message
+                        if (filteredTerms.length == 0 && query.length > 0) {
+                            setnoMatch(1);
+                        } else {
+                            setnoMatch(0);
+                        }
+                    }}
+                />
+            </div>
             <div className="sort-buttons">
             <button onClick={() => setSort(1)}>Sort by Category</button>
             <button onClick={() => setSort(2)}>Sort Alphabetically</button>
