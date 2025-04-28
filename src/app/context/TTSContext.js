@@ -123,6 +123,7 @@ export const TTSProvider = ({ children }) => {
     let index = 0;
     const nodesToWrap = [];
   
+    // Wrap visible text nodes word-by-word
     while (walker.nextNode()) {
       nodesToWrap.push(walker.currentNode);
     }
@@ -136,7 +137,7 @@ export const TTSProvider = ({ children }) => {
         const span = document.createElement("span");
         span.textContent = word + " ";
         span.className = "tts-word";
-        span.dataset.ttsIndex = index++; // Assign a unique index to each word
+        span.dataset.ttsIndex = index++;
         fragment.appendChild(span);
       });
   
@@ -158,18 +159,17 @@ export const TTSProvider = ({ children }) => {
     const unwantedTags = bodyClone.querySelectorAll("script, style, template");
     unwantedTags.forEach(tag => tag.remove());
   
-    // Replace each image with its alt text (if it exists)
+    // Do not replace images with alt text in the cloned body, just leave the images as is
     const images = bodyClone.querySelectorAll("img");
     images.forEach((img) => {
-      const altText = img.alt || "";                          // Use the alt text if available
-      const altNode = document.createTextNode(altText + " "); // Create a text node from alt text
-      img.replaceWith(altNode);                               // Replace the image with that text node
+      if (img.alt?.trim() && img.offsetParent !== null) {
+        // Do not replace the image with alt text, just leave it as an image
+      }
     });
   
     // Return all visible, readable text from the cleaned-up cloned body
     return bodyClone.innerText.trim();
   };
-  
   
   const speakPageContent = (startIndex = 0, content = getPageText(), element = null) => {
     if (!utterance) return;
@@ -196,7 +196,6 @@ export const TTSProvider = ({ children }) => {
   
     utterance.onboundary = (event) => {
       if (event.name === "word") {
-        // Calculate how many words have been spoken based on the charIndex
         const spokenWords = resumedText.slice(0, event.charIndex).split(/\s+/).length;
         spokenWordCount = startIndex + spokenWords;
   
@@ -205,10 +204,14 @@ export const TTSProvider = ({ children }) => {
           el.classList.remove("tts-highlight");
         });
   
-        // Find the span that corresponds to the current word
-        const currentWord = document.querySelector(`[data-tts-index="${spokenWordCount - 1}"]`);
-        if (currentWord) {
-          currentWord.classList.add("tts-highlight"); // Highlight the current word
+        // Find the element corresponding to the current word
+        const currentElement = document.querySelector(`[data-tts-index="${spokenWordCount - 1}"]`);
+  
+        if (currentElement) {
+          // Only highlight regular words, not alt text
+          if (!currentElement.classList.contains('tts-alt-text')) {
+            currentElement.classList.add("tts-highlight");
+          }
         }
       }
     };
@@ -231,6 +234,8 @@ export const TTSProvider = ({ children }) => {
       setCurrentIndex(null); // Reset index for future plays
     };
   };
+  
+  
   
 
   // Speak function for quick content
@@ -328,7 +333,7 @@ export const TTSProvider = ({ children }) => {
     }
 
     if (!clickTTS) return;  // Unactive this when user choose to turn off this feature
-    const elements = document.querySelectorAll('p, h1, h2, h3, span, img, button, input, textarea, label, value');
+    const elements = document.querySelectorAll('p, h1, h2, h3, span, img, button, input, textarea, label, value, term');
     elements.forEach(element => {
       element.addEventListener('click', handleClick);
     });

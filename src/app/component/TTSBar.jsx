@@ -219,7 +219,7 @@ export default function TTSBar() {
         {/* Dropdown Options */}
         {showOptions && (
           <div
-            className="absolute bottom-12 right-0 bg-[#f5f5f5] border rounded-xl p-3 transition-all duration-300 ease-in-out"
+            className="ignore-item absolute bottom-12 right-0 bg-[#f5f5f5] border rounded-xl p-3 transition-all duration-300 ease-in-out"
             onClick={(e) => e.stopPropagation()} // Prevent dropdown clicks from closing the menu
           >
             <div className="flex items-center">

@@ -430,6 +430,7 @@ p, h2, h3, h4 {
   transition: background-color 0.3s ease;
 }
 
-.highlight-element {
-  background-color: rgba(255, 255, 0, 0.2);
+img.tts-word.highlighted {
+  outline: 4px solid yellow; /* Highlight images differently */
+  border-radius: 10px; /* Optional: look smoother */
 }
