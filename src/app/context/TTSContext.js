@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useState, useEffect, useContext, useRef } from "react";
 import { auth } from "@/firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
 import { usePathname } from "next/navigation";
 
@@ -15,6 +16,7 @@ export const TTSProvider = ({ children }) => {
   const [voice, setVoice] = useState();
   const [voices, setVoices] = useState();
   const [ttsAnnouncement, setTTSAnnouncement] = useState(true);
+  const [highlightTTS, setHighlightTTS] = useState(true);
   const pathname = usePathname(); // Gets the current page route
   const db = getFirestore();
   const lastAnnouncementRef = useRef("");
@@ -28,57 +30,61 @@ export const TTSProvider = ({ children }) => {
     return true;  // Default value if running in server-side environment
   });
 
+  const saveTTSSettings = async (rate, voice, ttsAnnouncement, clickTTS, highlightTTS) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+    
+    try {
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, {
+        speed: rate,
+        voice: voice?.name || "",
+        announcement: ttsAnnouncement,
+        clickTTS: clickTTS ,
+        highlightTTS: highlightTTS
+      });
+      console.log("Saving voice and settings to Firestore:", voice?.name);
+    } catch (error) {
+      console.error("Error saving TTS settings:", error.message);
+    }
+  };
+
   useEffect(() => {
-    // Save the `clickTTS` value to localStorage whenever it changes
-    localStorage.setItem("clickTTS", JSON.stringify(clickTTS));
-  }, [clickTTS]);
+    if (rate !== null && voice && clickTTS !== null && highlightTTS !== null && ttsAnnouncement !== null) {
+      saveTTSSettings(rate, voice, ttsAnnouncement, clickTTS, highlightTTS);
+    }
+  }, [rate, voice, ttsAnnouncement, clickTTS, highlightTTS]);  
 
   // Fetching the saved values back when the page changes or reloads
   useEffect(() => {
-    const fetchSettings = async () => {
-      const currentUser = auth.currentUser;
-      if (!currentUser || !voices) return;
-
-      try {
-        const userRef = doc(db, "users", currentUser.uid);
-        const userSnap = await getDoc(userRef);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user && voices) {
+        try {
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
   
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-        
-          if (data.speed) setRate(data.speed);
-          if (data.voice) {
-            const matchedVoice = voices.find(v => v.name === data.voice);
-            if (matchedVoice) setVoice(matchedVoice);
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+  
+            if (data.speed) setRate(data.speed);
+            if (data.voice) {
+              const matchedVoice = voices.find(v => v.name === data.voice);
+              if (matchedVoice) setVoice(matchedVoice);
+            }
+            setTTSAnnouncement(data.hasOwnProperty("announcement") ? data.announcement : true);
+            setClickTTS(data.hasOwnProperty("clickTTS") ? data.clickTTS : true);
+            setHighlightTTS(data.hasOwnProperty("highlightTTS") ? data.highlightTTS : true);
           }
-          if (data.hasOwnProperty("announcement")) {
-            setTTSAnnouncement(data.announcement);
-          } else {
-            setTTSAnnouncement(true);
-          }
-          
-          if (data.hasOwnProperty("clickTTS")) {
-            setClickTTS(data.clickTTS);     // <-- FETCH FROM DATABASE
-          } else {
-            setClickTTS(true); // Default true if not set
-          }
+        } catch (err) {
+          console.error("Failed to load TTS settings:", err.message);
         }
-      } catch (err) {
-        console.error("Failed to load TTS settings:", err.message);
       }
-    };
+    });
   
-    fetchSettings();
+    return () => unsubscribe();  // Clean up the listener on unmount
   }, [voices]);
-    
-  useEffect(() => {
-    if (voice) {
-      saveTTSSettings(rate, voice, ttsAnnouncement, clickTTS);  // <-- Add clickTTS
-    }
-  }, [rate, voice, ttsAnnouncement, clickTTS]);
   
   
-
   useEffect(() => {
     const synth = window.speechSynthesis;
     
@@ -346,29 +352,10 @@ export const TTSProvider = ({ children }) => {
     };
   }, [pathname, handleClick, clickTTS]);
 
-  const saveTTSSettings = async (rate, voice, ttsAnnouncement, clickTTS) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-    
-    try {
-      const userRef = doc(db, "users", currentUser.uid);
-      await updateDoc(userRef, {
-        speed: rate,
-        voice: voice?.name || "",
-        announcement: ttsAnnouncement,
-        clickTTS: clickTTS   // <-- ADD THIS
-      });
-      console.log("Saving voice and settings to Firestore:", voice?.name);
-    } catch (error) {
-      console.error("Error saving TTS settings:", error.message);
-    }
-  };
-  
-
-
   return (
     <TTSContext.Provider value={{ getPageText, speakPageContent, resumeSpeaking, stopSpeaking, isSpeaking, currentIndex,
-       rate, setRate, voice, setVoice, voices, setVoices, speakText, clickTTS, setClickTTS, ttsAnnouncement, setTTSAnnouncement }}>
+       rate, setRate, voice, setVoice, voices, setVoices, speakText, clickTTS, setClickTTS, ttsAnnouncement, setTTSAnnouncement,
+       highlightTTS, setHighlightTTS, saveTTSSettings }}>
       {children}
     </TTSContext.Provider>
   );

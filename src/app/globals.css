@@ -277,17 +277,33 @@ p, h2, h3, h4 {
   padding-top: 10px;
   padding-bottom: 5px;
 }
-.sort-buttons {
+.term-search {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.term-search > input {
+  background-color: var(--shadow-color);
+  color: var(--foreground);
+  width: 550px;
+  border-radius: 40px;
+  padding: 10px;
+  margin: 5px;
+  font-size: var(--body-text-size);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+.sort-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center
 }
 .sort-buttons > button{
   background-color: var(--shadow-color);
   color: var(--foreground);
   border-radius: 40px;
-  padding: 10px;
-  margin: 5px;
+  padding: 20px;
+  margin: 15px;
   font-size: var(--body-text-size);
   font-weight: var(--font-weight-semibold);
   text-align: center;
@@ -424,10 +440,11 @@ p, h2, h3, h4 {
 
 }
 
+
 .tts-highlight {
-  outline: 2px solid #ffda48;
-  background-color: #fffd82;
-  transition: background-color 0.3s ease;
+outline: 2px solid #ffda48;
+background-color: #fffd82;
+transition: background-color 0.3s ease;
 }
 
 img.tts-word.highlighted {

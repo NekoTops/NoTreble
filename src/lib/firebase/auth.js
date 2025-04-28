@@ -23,6 +23,7 @@ const signUp = async (email, password, username, profilePic) => {
       speed: 1,
       voice: "Google US English",
       announcement: true,
+      highlightTTS: true,
       createdAt: new Date(),
     });
 
