@@ -20,7 +20,8 @@ export default function TTSBar() {
   const { clickTTS, setClickTTS } = useTTS(); // Use the TTS context
   const [buttonClicked, setButtonClicked] = useState(false); // State to track if the button is clicked
   const [showOptions, setShowOptions] = useState(false);  // State for the expanding button   
-  const { speakPageContent, speakText, stopSpeaking, isSpeaking, currentIndex, resumeSpeaking, rate, setRate, voice, setVoice, voices, setVoices, ttsAnnouncement, setTTSAnnouncement } = useTTS(); // Use the TTS context
+  const { speakPageContent, speakText, stopSpeaking, isSpeaking, currentIndex, resumeSpeaking, rate, 
+        setRate, voice, setVoice, voices, setVoices, ttsAnnouncement, setTTSAnnouncement, highlightTTS, setHighlightTTS, saveTTSSettings } = useTTS(); // Use the TTS context
   const menuRef = useRef();
     
   useEffect(() => {
@@ -132,19 +133,12 @@ export default function TTSBar() {
   };
 
   const handleAnnouncement = (e) => {
-    setTTSAnnouncement(e.target.checked);
-    
-    let choice = "";
-
-    if (e.target.checked) {
-      choice = "on";
-    }
-    else {
-      choice = "off";
-    }
-
-    speakText(`Announce Page ${choice}`)
-  }
+    const newAnnouncement = e.target.checked;
+    setTTSAnnouncement(newAnnouncement);
+  
+    let choice = newAnnouncement ? "on" : "off";
+    speakText(`Announce Page ${choice}`);
+  };
 
   const handleToggle = async () => {
     const currentUser = auth.currentUser;
@@ -196,10 +190,30 @@ export default function TTSBar() {
         console.error("Error updating text size:", error);
       }
     }
+  }; 
+  
+  const handleHighlight = async (e) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;  // No need to check clickTTS here
+  
+    const newHighlight = e.target.checked;  // Get the checkbox's new value
+  
+    try {
+      const userRef = doc(db, "users", currentUser.uid);
+      await setDoc(userRef, { highlightTTS: newHighlight }, { merge: true });
+  
+      setHighlightTTS(newHighlight);
+  
+      if (newHighlight) {
+        speakText("Highlighting texts on");
+      } else {
+        speakText("Highlighting texts off");
+      }
+    } catch (error) {
+      console.error("Error updating TTS setting:", error);
+    }
   };
   
-  
-
   return (
     <div
       style={{ position: "fixed", bottom: "10px", right: "20px", zIndex: 1000 }}
@@ -292,16 +306,26 @@ export default function TTSBar() {
             <label htmlFor="clickToSpeakToggle" className="text-custom">
               Click to Speak:
             </label>
-            {user && (
               <input
                 id="clickToSpeakToggle"
                 type="checkbox"
                 checked={clickTTS}
                 onChange={handleToggle}
                 className="w-6 h-6"
-
               />
-            )}
+          </div>
+          {/* Option to toggle the highlight for manual TTS */}
+          <div className="ignore-item flex text-custom items-center space-x-2 mt-4">
+            <label htmlFor="clickToHighlight" className="text-custom">
+              Highlight Texts:
+            </label>
+              <input
+                id="clickToHighlight"
+                type="checkbox"
+                checked={highlightTTS}
+                onChange={handleHighlight}
+                className="w-6 h-6"
+              />
           </div>
           {/* Text Size Buttons */}
           <div className="ignore-item flex text-custom items-center space-x-4 mt-4">
