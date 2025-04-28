@@ -42,6 +42,9 @@ export default function MusicPlayer({ params }) {
 
   useEffect(() => {
     if (xmlData && osmdContainerRef.current) {
+        const cleanTitle = filename
+        .replace(/_/g, " ")
+        .replace(/\.(xml|mxl)$/i, "");
       const osmd = new OpenSheetMusicDisplay(osmdContainerRef.current, {
         autoResize: true,
         drawTitle: true,
@@ -50,24 +53,8 @@ export default function MusicPlayer({ params }) {
       });
 
       osmd.load(xmlData).then(() => {
-        osmd.render();
-        requestAnimationFrame(() => {
-            const svg = osmdContainerRef.current?.querySelector("svg");
-            if (!svg) return;
-          
-            const textGroups = svg.querySelectorAll("g.vf-text > text");
-            //const cleanTitle = "New Title";
-          
-            textGroups.forEach((textNode) => {
-                const text = textNode.textContent?.trim();
-                if (/untitled score/i.test(text)) {
-                  const cleanTitle = filename.replace(/_/g, " ").replace(/\.(mxl|xml)$/i, "");
-                  textNode.textContent = cleanTitle;
-                }
-              });
-              
-          });          
-
+        osmd.Sheet.Title.text = cleanTitle;
+        osmd.render();         
         osmdRef.current = osmd;
 
         const audioPlayer = new AudioPlayer();
@@ -79,7 +66,7 @@ export default function MusicPlayer({ params }) {
         });
       });
     }
-  }, [xmlData]);
+  }, [xmlData, filename]);
 
   const playScore = async () => {
     const player = audioPlayerRef.current;

@@ -1,23 +1,44 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { FaCirclePause } from "react-icons/fa6";
-import { FaCirclePlay } from "react-icons/fa6";
-import { HiMiniSpeakerWave } from "react-icons/hi2";
+import { useRouter } from "next/navigation";
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTTS } from "../context/TTSContext"; // Import TTS functions
+import { onAuthStateChanged, updateEmail, updatePassword } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { auth } from "@/firebaseConfig";
+import { getUserProfile, updateUserProfile } from "@/lib/firebase/auth";
+import { FaCirclePause } from "react-icons/fa6";
+import { FaCirclePlay } from "react-icons/fa6";
+import { MdSettingsSuggest } from "react-icons/md";
 
 export default function TTSBar() {
+  const router = useRouter();
+  const db = getFirestore();
+  const [user, setUser] = useState(null);
+  const [newTextSize, setTextSize] = useState("medium");
+  const [newTTS, setTTS] = useState(false);
+  const { clickTTS, setClickTTS } = useTTS(); // Use the TTS context
   const [buttonClicked, setButtonClicked] = useState(false); // State to track if the button is clicked
-  const [isHovered, setIsHovered] = useState(false);
   const [showOptions, setShowOptions] = useState(false);  // State for the expanding button   
   const { speakPageContent, speakText, stopSpeaking, isSpeaking, currentIndex, resumeSpeaking, rate, setRate, voice, setVoice, voices, setVoices, ttsAnnouncement, setTTSAnnouncement } = useTTS(); // Use the TTS context
   const menuRef = useRef();
     
   useEffect(() => {
-    // Ensure the voices are populated from the SpeechSynthesis API
-    const allVoices = window.speechSynthesis.getVoices();
-    setVoices(allVoices); // Set the available voices in the TTS context
+    // Ensure that all voices are populated to the list
+    const loadVoices = () => {
+      const allVoices = window.speechSynthesis.getVoices();
+      setVoices(allVoices);
+    };
+  
+    // Listen to voices change event
+    loadVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+  
+    return () => {
+      window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+    };
   }, []);
+  
 
   useEffect(() =>{
     const handleClickOutside = (e) => {
@@ -34,6 +55,36 @@ export default function TTSBar() {
     };
   }, [showOptions]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        router.push("/Login");
+        return;
+      }
+      try {
+        const profileData = await getUserProfile(currentUser.uid);
+        setUser({
+          ...profileData,
+        });
+        setTTS(profileData.clickTTS || true);
+  
+        // Fetch the text size setting to work with global CSS
+        const storedTextSize = profileData.textSize || "medium";
+        setTextSize(storedTextSize);
+        
+        document.body.classList.toggle("large-text-size", storedTextSize === "large");
+        document.body.classList.toggle("medium-text-size", storedTextSize === "medium");
+        
+        document.documentElement.style.setProperty('--custom-text-size', storedTextSize === 'large' ? '18px' : '14px');
+        
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    });
+  
+    return () => unsubscribe();
+  }, [router]);
+
   // Bind play/pause button with space bar
   useHotkeys("space", (e) => {
     e.preventDefault()   // Stop spacebar from scrolling
@@ -49,7 +100,7 @@ export default function TTSBar() {
       stopSpeaking();  // Stop speech if currently speaking
     } else {
       // Start from the beginning, or resume from the last word
-      if (currentIndex !== null) {
+      if (currentIndex != null && currentIndex >= 0) {
         resumeSpeaking(); // Resume if we have a current index
       } else {
         speakPageContent(); // Start speaking if no previous index
@@ -95,6 +146,59 @@ export default function TTSBar() {
     speakText(`Announce Page ${choice}`)
   }
 
+  const handleToggle = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || clickTTS === null) return;  // Ensure user is loaded and newTTS is not null
+  
+    const toggledTTS = !clickTTS;  // Toggle the current value
+  
+    try {
+      // Update TTS setting in Firestore
+      const userRef = doc(db, "users", currentUser.uid);
+      await setDoc(userRef, { clickTTS: toggledTTS }, { merge: true });
+  
+      console.log(`TTS set to ${toggledTTS ? "ON" : "OFF"}`);
+      setClickTTS(toggledTTS);  // Update local state for TTS
+
+      if (toggledTTS) {
+        speakText("Click to speak on");
+      }
+      else {
+        speakText("Click to speak off");
+      }
+
+    } catch (error) {
+      console.error("Error updating TTS setting:", error);
+    }
+  };
+  
+  const handleTextSizeChange = async (newTextSize) => {
+    // Toggle the text size classes on the body
+    document.body.classList.toggle("large-text-size", newTextSize === "large");
+    document.body.classList.toggle("medium-text-size", newTextSize === "medium");
+    
+    // Update the local state
+    setTextSize(newTextSize);
+    if (newTextSize == "medium") {
+      speakText("Text size set to medium");
+    }
+    else {
+      speakText("Text size set to large");
+    }
+    // Update the text size preference in Firestore
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const userRef = doc(db, "users", currentUser.uid);
+      try {
+        await setDoc(userRef, { textSize: newTextSize }, { merge: true });
+        console.log(`Text size set to ${newTextSize}`);
+      } catch (error) {
+        console.error("Error updating text size:", error);
+      }
+    }
+  };
+  
+  
 
   return (
     <div
@@ -109,7 +213,7 @@ export default function TTSBar() {
             handleExpand();
           }}
         >
-          <HiMiniSpeakerWave size={70} data-ignore-tts className= "hover:scale-125" />
+          <MdSettingsSuggest size={50} data-ignore-tts className= "hover:scale-125" />
         </button>
 
         {/* Dropdown Options */}
@@ -128,22 +232,22 @@ export default function TTSBar() {
                 }}
               >
                 {!isSpeaking ? (
-                  <FaCirclePlay size={40} color={isHovered ? "#303E60" : "#455090"} />
+                  <FaCirclePlay size={40} color="#303E60" />
                 ) : (
-                  <FaCirclePause size={40} color={isHovered ? "#303E60" : "#455090"} />
+                  <FaCirclePause size={40} color="#303E60"/>
                 )}
               </div>
 
               {/* Speed Dropdown */}
-              <div className="mr-5 text-body">
+              <div className="mr-5 text-custom">
                 <label>Speed</label>
-                <select
+                <select 
                   value={rate}
                   onChange={(e) => {
                     e.stopPropagation();
                     handleRate(e);
                   }}
-                  className="content-center text-center text-body bg-gray-300 shadow"
+                  className="content-center text-center bg-gray-300 shadow"
                   title={`Speed: ${rate}`}
                 >
                   <option value="0.5">0.5</option>
@@ -156,7 +260,7 @@ export default function TTSBar() {
               </div>
 
               {/* Voice Dropdown */}
-              <div className="text-body">
+              <div className="text-custom">
                 <label>Voice</label>
                 <select
                   className="bg-gray-300 shadow"
@@ -174,15 +278,52 @@ export default function TTSBar() {
               </div>
           </div>
           {/* Option to toggle the page announcement*/}
-          <div>
+          <div className="ignore-item flex text-custom items-center space-x-2 mt-4">
+            <label htmlFor="announcementToggle" className="text-custom">Announce page</label>
             <input 
               type="checkbox"
               id="announcementToggle"
               checked={ttsAnnouncement}
               onChange={(e) => handleAnnouncement(e)}
-              className="tts-announcement w-6 h-6 m-4"
+              className="tts-announcement w-6 h-6"
             />
-            <label htmlFor="announcementToggle" className="text-body">Announce page</label>
+          </div>
+          <div className="ignore-item flex text-custom items-center space-x-2 mt-4">
+            <label htmlFor="clickToSpeakToggle" className="text-custom">
+              Click to Speak:
+            </label>
+            {user && (
+              <input
+                id="clickToSpeakToggle"
+                type="checkbox"
+                checked={clickTTS}
+                onChange={handleToggle}
+                className="w-6 h-6"
+
+              />
+            )}
+          </div>
+          {/* Text Size Buttons */}
+          <div className="ignore-item flex text-custom items-center space-x-4 mt-4">
+            <p>Text Sizes:</p>
+            <div className="space-x-2">
+              <button
+                onClick={() => handleTextSizeChange("medium")}
+                className={`uppercase px-3 py-2 font-bold border rounded-lg ${
+                  newTextSize === "medium" ? "bg-green-500 text-white" : "bg-white text-black"
+                }`}
+              >
+                M
+              </button>
+              <button
+                onClick={() => handleTextSizeChange("large")}
+                className={`uppercase px-3 py-1 font-bold text-[var(--custom-text-size)] border rounded-lg ${
+                  newTextSize === "large" ? "bg-green-500 text-white" : "bg-white text-black"
+                }`}
+              >
+                L
+              </button>
+            </div>
           </div>
         </div>
         )}

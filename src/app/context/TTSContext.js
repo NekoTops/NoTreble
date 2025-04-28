@@ -44,23 +44,23 @@ export const TTSProvider = ({ children }) => {
         const userSnap = await getDoc(userRef);
   
         if (userSnap.exists()) {
-          const data = userSnap.data();   // Grab data from user's document
-  
-          if (data.speed) {
-            setRate(data.speed);    // Update the rate of TTS
-          }
-  
+          const data = userSnap.data();
+        
+          if (data.speed) setRate(data.speed);
           if (data.voice) {
             const matchedVoice = voices.find(v => v.name === data.voice);
-            if (matchedVoice) {
-              setVoice(matchedVoice);   // Update the voice of TTS
-            }
+            if (matchedVoice) setVoice(matchedVoice);
+          }
+          if (data.hasOwnProperty("announcement")) {
+            setTTSAnnouncement(data.announcement);
+          } else {
+            setTTSAnnouncement(true);
           }
           
-          if (data.hasOwnProperty("announcement")) {
-            setTTSAnnouncement(data.announcement); // Use the saved setting
+          if (data.hasOwnProperty("clickTTS")) {
+            setClickTTS(data.clickTTS);     // <-- FETCH FROM DATABASE
           } else {
-            setTTSAnnouncement(true); // Default if not set
+            setClickTTS(true); // Default true if not set
           }
         }
       } catch (err) {
@@ -73,9 +73,10 @@ export const TTSProvider = ({ children }) => {
     
   useEffect(() => {
     if (voice) {
-      saveTTSSettings(rate, voice, ttsAnnouncement);
+      saveTTSSettings(rate, voice, ttsAnnouncement, clickTTS);  // <-- Add clickTTS
     }
-  }, [rate, voice, ttsAnnouncement]);
+  }, [rate, voice, ttsAnnouncement, clickTTS]);
+  
   
 
   useEffect(() => {
@@ -279,7 +280,7 @@ export const TTSProvider = ({ children }) => {
       return;
     }
 
-    if (element.closest("tts-announcement")){
+    if (element.closest("tts-announcement") || element.closest("ignore-item")){
       return;
     }
 
@@ -340,24 +341,24 @@ export const TTSProvider = ({ children }) => {
     };
   }, [pathname, handleClick, clickTTS]);
 
-  const saveTTSSettings = async (rate, voice, ttsAnnouncement) => {
+  const saveTTSSettings = async (rate, voice, ttsAnnouncement, clickTTS) => {
     const currentUser = auth.currentUser;
-    if (!currentUser) return;   // Don't save the changes if not logged in
+    if (!currentUser) return;
     
     try {
-      // Save voice, rate and announcement settings
       const userRef = doc(db, "users", currentUser.uid);
       await updateDoc(userRef, {
         speed: rate,
-        voice: voice?.name || "", 
-        announcement: ttsAnnouncement
+        voice: voice?.name || "",
+        announcement: ttsAnnouncement,
+        clickTTS: clickTTS   // <-- ADD THIS
       });
-      console.log("Saving voice to Firestore:", voice?.name);
-      console.log("TTS settings saved to Firestore");
+      console.log("Saving voice and settings to Firestore:", voice?.name);
     } catch (error) {
       console.error("Error saving TTS settings:", error.message);
     }
   };
+  
 
 
   return (
