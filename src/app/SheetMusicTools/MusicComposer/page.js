@@ -213,10 +213,10 @@ export default function ComposerPage() {
         } else {
           setAccidental("");
         }
-      } else if (["1", "2", "3", "4"].includes(e.key)) {
-        // length of note (1=whole, 2=half, 3=quarter, 4=eighth)
-        const durMap = { "1": "w", "2": "h", "3": "q", "4": "8" };
-        const dur = durMap[e.key];
+      } else if (["6", "7", "8", "9"].includes(e.key)) {
+        // length of note (6=whole, 7=half, 8=quarter, 9=eighth)
+        const durMap = { "6": "w", "7": "h", "8": "q", "9": "8" };
+        const dur = durMap[e.key];      
         if (selectedNoteIndex !== null) {
           const currentNotes = [...notes];
           const noteObj = { ...currentNotes[selectedNoteIndex] };
@@ -830,10 +830,10 @@ if (el) {
           <ul className="text-body list-disc pl-6 mt-2 space-y-1">
             <li><b>Note Letters (A-G):</b> Set pitch (or change selected note pitch)</li>
             <li><b>3 / 4 / 5:</b> Set octave (or change selected note octave)</li>
-            <li><b>1:</b> Whole note</li>
-            <li><b>2:</b> Half note</li>
-            <li><b>3:</b> Quarter note</li>
-            <li><b>4:</b> Eighth note</li>
+            <li><b>6:</b> Whole note</li>
+            <li><b>7:</b> Half note</li>
+            <li><b>8:</b> Quarter note</li>
+            <li><b>9:</b> Eighth note</li>
             <li><b>+ / - / n:</b> Sharp / Flat / Natural (toggle accidentals)</li>
             <li><b>r:</b> Toggle rest</li>
             <li><b>Enter:</b> Add note</li>
