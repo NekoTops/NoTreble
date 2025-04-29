@@ -177,7 +177,7 @@ export default function TTSBar() {
               </div>
 
               <div className="text-body">
-                <label>Text Size</label>
+                <label>Text</label>
                 <select
                   className="bg-gray-300 shadow"
                   value={textSize}
