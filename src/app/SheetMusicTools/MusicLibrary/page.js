@@ -6,7 +6,6 @@ import { auth } from "@/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { TfiControlBackward } from "react-icons/tfi";
 import "../../cs/MusicLibrary.css";
-import "../../cs/MusicLibrary.css";
 
 export default function Library() {
   const [files, setFiles] = useState([]);
@@ -65,8 +64,7 @@ export default function Library() {
 
   const filteredFiles = (files || []).filter((file) =>
       file.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-
+);
 
   return (
 

@@ -68,7 +68,7 @@ export default function Pitches(){
                 
                 <p>The keyboard is great for helping you develop a visual, aural, and tactile understanding of music theory. On the illustration below, the <em>pitch-class</em> letter names are written on the keyboard. </p>
 
-                <a href="/LessonImages/keyboardlayout-small.png"><img src={'/LessonImages/keyboardlayout-small.png'} style={{ width: '50%', height: '50%' }}/></a>
+                <a href="/LessonImages/keyboardlayout-small.png"><img src={'/LessonImages/keyboardlayout-small.png'} style={{ width: '50%', height: '50%' }} alt="The picture shows musical note relationships: C# is OF D, D# is OF B, E is F, G, A, F# is OF G, G# is OF A, A# is OF B, C is OF B#"/></a>
 
                 <h3>Enharmonic equivalence </h3>
 

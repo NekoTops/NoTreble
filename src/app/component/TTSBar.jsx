@@ -21,7 +21,7 @@ export default function TTSBar() {
   const [buttonClicked, setButtonClicked] = useState(false); // State to track if the button is clicked
   const [showOptions, setShowOptions] = useState(false);  // State for the expanding button   
   const { speakPageContent, speakText, stopSpeaking, isSpeaking, currentIndex, resumeSpeaking, rate, 
-        setRate, voice, setVoice, voices, setVoices, ttsAnnouncement, setTTSAnnouncement, highlightTTS, setHighlightTTS, saveTTSSettings } = useTTS(); // Use the TTS context
+        setRate, voice, setVoice, voices, setVoices, ttsAnnouncement, setTTSAnnouncement, highlightTTS, setHighlightTTS, removeHighlights } = useTTS(); // Use the TTS context
   const menuRef = useRef();
     
   useEffect(() => {
@@ -207,6 +207,7 @@ export default function TTSBar() {
       if (newHighlight) {
         speakText("Highlighting texts on");
       } else {
+        removeHighlights();
         speakText("Highlighting texts off");
       }
     } catch (error) {
@@ -216,6 +217,7 @@ export default function TTSBar() {
   
   return (
     <div
+      data-ignore-tts
       style={{ position: "fixed", bottom: "10px", right: "20px", zIndex: 1000 }}
     >
       <div style={{ position: "relative" }} ref={menuRef}>
@@ -227,7 +229,7 @@ export default function TTSBar() {
             handleExpand();
           }}
         >
-          <MdSettingsSuggest size={50} data-ignore-tts className= "hover:scale-125" />
+          <MdSettingsSuggest size={50} data-ignore-tts className= "menu-button hover:scale-125" />
         </button>
 
         {/* Dropdown Options */}

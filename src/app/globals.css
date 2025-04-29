@@ -440,9 +440,10 @@ p, h2, h3, h4 {
 
 }
 
-
 .tts-highlight {
-outline: 2px solid #ffda48;
-background-color: #fffd82;
-transition: background-color 0.3s ease;
+  background-color: yellow;
+}
+
+.tts-highlight-link {
+  border: 2px solid red;
 }

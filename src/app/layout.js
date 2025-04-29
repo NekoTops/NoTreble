@@ -38,10 +38,10 @@ export default function RootLayout({ children }) {
         <TTSProvider>
           <TextSizeProvider>
             <Header />
-            <HotKeyProvider />
-            <TTSBar />
-            {children}
-          </TextSizeProvider>
+              <HotKeyProvider />
+                <TTSBar />
+                  <div id="tts-wrapper">{children}</div>
+                </TextSizeProvider>
         </TTSProvider>
       </body>
     </html>
