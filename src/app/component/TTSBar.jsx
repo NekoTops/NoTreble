@@ -217,7 +217,7 @@ export default function TTSBar() {
   
   return (
     <div
-    className="ttsBar"
+      data-ignore-tts
       style={{ position: "fixed", bottom: "10px", right: "20px", zIndex: 1000 }}
     >
       <div style={{ position: "relative" }} ref={menuRef}>
@@ -229,13 +229,13 @@ export default function TTSBar() {
             handleExpand();
           }}
         >
-          <MdSettingsSuggest size={50} data-ignore-tts className= "hover:scale-125" />
+          <MdSettingsSuggest size={50} data-ignore-tts className= "menu-button hover:scale-125" />
         </button>
 
         {/* Dropdown Options */}
         {showOptions && (
           <div
-            className="ignore-item absolute bottom-12 right-0 bg-[#f5f5f5] border rounded-xl p-3 transition-all duration-300 ease-in-out"
+            className="absolute bottom-12 right-0 bg-[#f5f5f5] border rounded-xl p-3 transition-all duration-300 ease-in-out"
             onClick={(e) => e.stopPropagation()} // Prevent dropdown clicks from closing the menu
           >
             <div className="flex items-center">

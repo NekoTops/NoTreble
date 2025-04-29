@@ -4,6 +4,7 @@ import { auth } from "@/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
 import { usePathname } from "next/navigation";
+import { remove } from "firebase/database";
 
 // Create Context
 const TTSContext = createContext();
@@ -21,8 +22,8 @@ export const TTSProvider = ({ children }) => {
   const db = getFirestore();
   const lastAnnouncementRef = useRef("");
   let ttsInitialized = false;
-  let altTextQueue = []; // Queue to hold alt texts to be spoken
   let isSpeakingAltText = false;
+  let isClickSpeaking = false;
 
   const [clickTTS, setClickTTS] = useState(() => {
     if (typeof window !== "undefined") {
@@ -122,87 +123,91 @@ export const TTSProvider = ({ children }) => {
   const getPageText = () => {
     const bodyClone = document.body.cloneNode(true);
   
-    // Remove TTS bar
-    const ttsBar = bodyClone.querySelector(".ttsBar");
-    if (ttsBar) {
-      ttsBar.remove();
-    }
+    // Remove any elements we don't want read
+    const ignoreSelectors = [
+      '[data-ignore-tts]',
+    ];
   
+    ignoreSelectors.forEach(selector => {
+      bodyClone.querySelectorAll(selector).forEach(el => el.remove());
+    });
+  
+    // Remove unwanted tags
     const unwantedTags = bodyClone.querySelectorAll("script, style, template");
     unwantedTags.forEach(tag => tag.remove());
   
-    // For each image, inject the alt text into reading flow
+    // Remove alt text from images (so it won't read them automatically)
     const images = bodyClone.querySelectorAll("img");
     images.forEach((img) => {
       if (img.alt?.trim()) {
-        const span = document.createElement("span");
-        span.textContent = ` ${img.alt.trim()} `; // Insert alt text without removing the image
-        img.parentNode.insertBefore(span, img.nextSibling);
+        img.removeAttribute("alt");
       }
     });
   
     return bodyClone.innerText.trim();
-  };  
+  };
+  
   
   // Call this function to remove all highlights
   const removeHighlights = () => {
-    document.querySelectorAll(".tts-word.tts-highlight, img.tts-highlight, a.tts-highlight-link").forEach((el) => {
+    const highlightedElements = document.querySelectorAll(".tts-highlight");
+    highlightedElements.forEach((el) => {
       el.classList.remove("tts-highlight");
     });
   };
   
+  
   const wrapVisibleTextNodes = () => {
+    // Create a TreeWalker to walk through all text nodes in the document body
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) => {
+        // Skip nodes inside the .ttsBar element
         if (node.parentNode && node.parentNode.closest(".ttsBar")) {
           return NodeFilter.FILTER_REJECT;
         }
+  
+        // Reject empty or whitespace-only text nodes
         if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-        if (!node.parentElement || node.parentElement.offsetParent === null) return NodeFilter.FILTER_REJECT;
+  
+        // Reject nodes that are not visible (e.g., hidden or offscreen elements)
+        if (!node.parentElement || node.parentElement.offsetParent === null) {
+          return NodeFilter.FILTER_REJECT;
+        }
+  
+        // Accept visible text nodes
         return NodeFilter.FILTER_ACCEPT;
       },
     });
   
-    let index = 0;
-    const nodesToWrap = [];
+    let index = 0; // Initialize a counter for indexing each word
+    const nodesToWrap = []; // Array to hold all text nodes that will be wrapped
   
+    // Traverse through all text nodes and add them to the nodesToWrap array
     while (walker.nextNode()) {
       nodesToWrap.push(walker.currentNode);
     }
   
+    // Process each text node in the nodesToWrap array
     nodesToWrap.forEach((textNode) => {
-      const parent = textNode.parentNode;
-      const words = textNode.textContent.trim().split(/\s+/);
-      const fragment = document.createDocumentFragment();
+      const parent = textNode.parentNode;  // Get the parent of the text node
+      const words = textNode.textContent.trim().split(/\s+/);  // Split the text into words
+      const fragment = document.createDocumentFragment();  // Create a document fragment to batch changes
   
+      // Create a span for each word and add it to the fragment
       words.forEach((word) => {
         const span = document.createElement("span");
-        span.textContent = word + " ";
-        span.className = "tts-word";
-        span.dataset.ttsIndex = index++; // Set the data-tts-index for text
-        fragment.appendChild(span);
+        span.textContent = word + " ";  // Add a space after each word to preserve spacing
+        span.className = "tts-word";  // Add a class to each span for CSS styling or TTS functionality
+        span.dataset.ttsIndex = index++;  // Set a data-attribute to keep track of word index
+        fragment.appendChild(span);  // Append the span to the fragment
       });
   
+      // Replace the original text node with the new fragment of spans
       parent.replaceChild(fragment, textNode);
     });
-  
-    // Handle images and set their index
-    const images = document.querySelectorAll("img");
-    images.forEach((img) => {
-      if (img.alt?.trim() && img.offsetParent !== null) {
-        img.dataset.ttsAltText = img.alt.trim(); // Set alt text as dataset
-        img.dataset.ttsIndex = index++; // Set the data-tts-index for images
-        console.log("Image processed: ", img); // Debug log to check if images are correctly processed
-      }
-  
-      // Check if the image is inside a link
-      if (img.closest("a")) {
-        img.dataset.ttsInLink = true; // Mark if the image is inside a link
-      }
-    });
   };
-  
-  const speakPageContent = (startIndex = 0, content = getPageText()) => {
+
+  const speakPageContent = (startIndex = 0, content = getPageText(), element = null) => {
     if (!utterance) return;
   
     if (!ttsInitialized) {
@@ -223,100 +228,68 @@ export const TTSProvider = ({ children }) => {
     utterance.text = resumedText;
   
     let localStartIndex = startIndex;
-  
-    // onboundary event handler
-    utterance.onboundary = (event) => {
-      console.log("onboundary fired!", event);
-      console.log("Event name:", event.name);
-      console.log("Char index:", event.charIndex);
-      if (altTextQueue.length > 0) {
-        console.log("Alt text is still being spoken, skipping further processing.");
-        return; // Don't proceed with further processing while alt text is being spoken
-      }
-  
-      if (!highlightTTS) {
-        removeHighlights(); // Remove highlights if highlighting is disabled
-        return;
-      }
-  
-      if (event.name === "word") {
-        const spokenWords = resumedText.slice(0, event.charIndex).split(/\s+/).length;
-        const nextWordIndex = localStartIndex + spokenWords - 1;
-  
-        setCurrentIndex(nextWordIndex);
-        removeHighlights(); // Clear previous highlights
-  
-        const wordElement = document.querySelector(`[data-tts-index="${nextWordIndex}"]`);
-        const imageElement = document.querySelector(`img[data-tts-index="${nextWordIndex}"]`);
-  
-        if (imageElement) {
-          imageElement.classList.add("tts-highlight");
-  
-          const linkElement = imageElement.closest("a");
-          if (linkElement) {
-            linkElement.classList.add("tts-highlight-link");
-          }
-  
-          window.speechSynthesis.cancel(); // Cancel previous speech
-  
-          // Add alt text to the queue and speak it
-          altTextQueue.push(imageElement.dataset.ttsAltText);
-          console.log("Queueing alt text for image: ", imageElement.dataset.ttsAltText);
-          isSpeakingAltText = true; // Flag indicating alt text is being spoken
-  
-          // Start speaking the next alt text in the queue
-          speakNextAltText();
-  
-          return; // Stop further processing for the current word and ensure no text is read until alt text is done
-        } else if (wordElement) {
-          wordElement.classList.add("tts-highlight");
+
+    // Only add highlights if we're not using the click-to-speak functionality
+    if (highlightTTS && !element && !isClickSpeaking) {
+
+      // onboundary event handler
+      utterance.onboundary = (event) => {
+        if (isSpeakingAltText) {
+          console.log("Currently speaking alt text, skipping boundary processing.");
+          return; // Fully skip processing if speaking alt text
         }
-      }
-    };
+  
+        if (event.name === "word") {
+          const spokenWords = resumedText.slice(0, event.charIndex).split(/\s+/).length;
+          const nextWordIndex = localStartIndex + spokenWords - 1;
+  
+          setCurrentIndex(nextWordIndex);
+          removeHighlights(); // Clear previous highlights
+  
+          const wordElement = document.querySelector(`[data-tts-index="${nextWordIndex}"]`);
+          const imageElement = document.querySelector(`img[data-tts-index="${nextWordIndex}"]`);
+  
+          if (imageElement) {
+            return; // Just skip processing the image alt text
+          } else if (wordElement) {
+            if (!isClickSpeaking) {
+              wordElement.classList.add("tts-highlight");
+            }
+          }
+        }
+      };
+    }
   
     // onend event handler
     utterance.onend = () => {
       removeHighlights(); // Remove all highlights when TTS ends
       setIsSpeaking(false);
       setCurrentIndex(null);
+      isClickSpeaking = false;
     };
   
     // Start speaking the text
     window.speechSynthesis.speak(utterance);
     setIsSpeaking(true);
-  };
+  };  
 
-  // Function to speak the next alt text in the queue
-  const speakNextAltText = (resumeIndex) => {
-    if (altTextQueue.length === 0) {
-      isSpeakingAltText = false; // Reset the flag
-      speakPageContent(resumeIndex); // <<< Resume reading the page from the correct index
-      return;
-    }
-  
-    const altText = altTextQueue.shift(); // Get next alt text
-    speakText(altText, () => {
-      console.log("Finished speaking alt text: ", altText);
-      speakNextAltText(resumeIndex); // Pass resumeIndex down so you can continue when all alt texts are spoken
-    });
-  };
-
-  // Speak function for quick content
-  const speakText = (text, callback = null) => {
-    if (!text) return;
-
+  const speakText = (text, element) => {
     const tempUtterance = new SpeechSynthesisUtterance(text);
     tempUtterance.voice = voice;
     tempUtterance.rate = rate;
-
+  
     tempUtterance.onend = () => {
-      if (callback) callback(); // Call the callback after speaking
-      setIsSpeaking(false);
+      isSpeakingAltText = false;
+      if (element) {
+        element.classList.remove("speaking");
+      }
     };
-
+  
     window.speechSynthesis.speak(tempUtterance);
-    setIsSpeaking(true);
+    isSpeakingAltText = true;
   };
+  
+
 
   // Resume function
   const resumeSpeaking = () => {
@@ -333,28 +306,20 @@ export const TTSProvider = ({ children }) => {
   const handleClick = (event) => {
     const element = event.target;
     let content = "";
-  
-    window.speechSynthesis.pause();
+    isClickSpeaking = true;
 
-    // Clear previous highlights
-    document.querySelectorAll(".tts-highlight").forEach(el => el.classList.remove("tts-highlight"));
+    window.speechSynthesis.cancel();
 
-    // Add highlight to the current clicked element
+    removeHighlights();
     element.classList.add("tts-highlight");
 
-    // When clicking the speaker icon, it should read "TTS Menu" instead of the whole page
-    if (element.closest('[data-ignore-tts]')) {
+    if (element.closest('.menu-button')) {
       if (isSpeaking) return;
       stopSpeaking();
-      speakText("TTS Menu");
+      speakText("Customization Menu");
       return;
     }
 
-    if (element.closest("tts-announcement") || element.closest("ignore-item")){
-      return;
-    }
-
-    // Determine what to read for input, label and images
     if (["INPUT", "LABEL", "TEXTAREA", "SELECT"].includes(element.tagName)) {
       content = element.value?.trim() || element.getAttribute("placeholder")?.trim() || element.getAttribute("name")?.trim() || element.getAttribute("title")?.trim();
     } else if (element.tagName === "IMG") {
@@ -363,53 +328,53 @@ export const TTSProvider = ({ children }) => {
       content = element.innerText?.trim();
     }
 
-    console.log('Clicked element:', element);
-
-    // If no content found, don't speak anything and also remove highlight
     if (!content) {
-      element.classList.remove("tts-highlight");
+      removeHighlights();
+      isClickSpeaking = false;
       return;
     }
-    // on click read
-    console.log("I herd a clickkk");
 
-    speakPageContent(0, content, element); // Read current paragraph
+    console.log("I heard a click");
+    speakText(content, element);
   };
+
 
   useEffect(() => {
     if (!pathname) return;
-
-    if (ttsAnnouncement){
+  
+    if (ttsAnnouncement) {
       // Split the path name into segments and only pick the last segment to announce it
       const segments = pathname.split("/").filter(Boolean);
-      const lastSegment = segments[segments.length-1] || "Home";
-
+      const lastSegment = segments[segments.length - 1] || "Home";
+  
       const pageName = lastSegment
         .replace(/([A-Z])/g, " $1")
         .replace(/-/g, " ")
         .trim();
-
+  
       const announcement = `You are on the ${pageName} page`;
-      // Only speak if the announcement changed
+  
+      // Only speak if the announcement changed and pathname has genuinely changed (not just form field changes)
       if (lastAnnouncementRef.current !== announcement) {
         lastAnnouncementRef.current = announcement;
         speakText(announcement);
       }
     }
-
-    if (!clickTTS) return;  // Unactive this when user choose to turn off this feature
-    const elements = document.querySelectorAll('p, h1, h2, h3, span, img, button, input, textarea, label, value, term');
+  
+    // Skip announcement when interacting with form elements or other interactive elements
+    if (!clickTTS) return;  // Disable click-based TTS if the user disabled it
+    const elements = document.querySelectorAll('p, h1, h2, h3, h4, span, img, button, input, textarea, label, value, term');
     elements.forEach(element => {
       element.addEventListener('click', handleClick);
     });
-
+  
     return () => {
-    elements.forEach(element => {
-      // Clean up the old event listeners and make sure the current DOM elements have nothing from the previous route
-      element.removeEventListener('click', handleClick);
-    });
+      elements.forEach(element => {
+        // Clean up event listeners on unmount
+        element.removeEventListener('click', handleClick);
+      });
     };
-  }, [pathname, handleClick, clickTTS]);
+  }, [pathname, ttsAnnouncement, clickTTS]);  
 
   return (
     <TTSContext.Provider value={{ getPageText, speakPageContent, resumeSpeaking, stopSpeaking, isSpeaking, currentIndex,
