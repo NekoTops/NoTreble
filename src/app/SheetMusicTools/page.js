@@ -197,7 +197,7 @@ export default function SheetMusicTools() {
       <div className="bg-[#f5f5f5] mt-10 p-8 rounded-2xl shadow border border-gray-300 text-center flex flex-col items-center max-w-4xl mx-auto">
         <h2 className="text-h3 font-bold mb-2">Start Writing Your Own Music!</h2>
         <p className="text-2xl text-gray-700 mb-6 max-w-xl">
-          Turn your ideas into reality with our intuitive sheet music composer.
+          Turn your ideas into reality with our intuitive sheet music composer. Add notes, customize rhythms, and hear your composition come to life.
         </p>
 
         <img
