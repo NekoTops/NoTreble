@@ -21,6 +21,8 @@ export const TTSProvider = ({ children }) => {
   const db = getFirestore();
   const lastAnnouncementRef = useRef("");
   let ttsInitialized = false;
+  let altTextQueue = []; // Queue to hold alt texts to be spoken
+  let isSpeakingAltText = false;
 
   const [clickTTS, setClickTTS] = useState(() => {
     if (typeof window !== "undefined") {
@@ -117,9 +119,44 @@ export const TTSProvider = ({ children }) => {
     };
   }, [pathname]);
 
+  const getPageText = () => {
+    const bodyClone = document.body.cloneNode(true);
+  
+    // Remove TTS bar
+    const ttsBar = bodyClone.querySelector(".ttsBar");
+    if (ttsBar) {
+      ttsBar.remove();
+    }
+  
+    const unwantedTags = bodyClone.querySelectorAll("script, style, template");
+    unwantedTags.forEach(tag => tag.remove());
+  
+    // For each image, inject the alt text into reading flow
+    const images = bodyClone.querySelectorAll("img");
+    images.forEach((img) => {
+      if (img.alt?.trim()) {
+        const span = document.createElement("span");
+        span.textContent = ` ${img.alt.trim()} `; // Insert alt text without removing the image
+        img.parentNode.insertBefore(span, img.nextSibling);
+      }
+    });
+  
+    return bodyClone.innerText.trim();
+  };  
+  
+  // Call this function to remove all highlights
+  const removeHighlights = () => {
+    document.querySelectorAll(".tts-word.tts-highlight, img.tts-highlight, a.tts-highlight-link").forEach((el) => {
+      el.classList.remove("tts-highlight");
+    });
+  };
+  
   const wrapVisibleTextNodes = () => {
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) => {
+        if (node.parentNode && node.parentNode.closest(".ttsBar")) {
+          return NodeFilter.FILTER_REJECT;
+        }
         if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
         if (!node.parentElement || node.parentElement.offsetParent === null) return NodeFilter.FILTER_REJECT;
         return NodeFilter.FILTER_ACCEPT;
@@ -129,7 +166,6 @@ export const TTSProvider = ({ children }) => {
     let index = 0;
     const nodesToWrap = [];
   
-    // Wrap visible text nodes word-by-word
     while (walker.nextNode()) {
       nodesToWrap.push(walker.currentNode);
     }
@@ -143,121 +179,144 @@ export const TTSProvider = ({ children }) => {
         const span = document.createElement("span");
         span.textContent = word + " ";
         span.className = "tts-word";
-        span.dataset.ttsIndex = index++;
+        span.dataset.ttsIndex = index++; // Set the data-tts-index for text
         fragment.appendChild(span);
       });
   
       parent.replaceChild(fragment, textNode);
     });
-  };
   
-  const getPageText = () => {
-    // Clone the entire body so we can manipulate it without affecting the real DOM
-    const bodyClone = document.body.cloneNode(true);
-  
-    // Find and remove the TTS bar from the cloned body (so it’s not read out loud)
-    const ttsBar = bodyClone.querySelector(".ttsBar");
-    if (ttsBar) {
-      ttsBar.remove();
-    }
-  
-    // Remove any unwanted tags that might contain scripts, styles, or non-visible content
-    const unwantedTags = bodyClone.querySelectorAll("script, style, template");
-    unwantedTags.forEach(tag => tag.remove());
-  
-    // Do not replace images with alt text in the cloned body, just leave the images as is
-    const images = bodyClone.querySelectorAll("img");
+    // Handle images and set their index
+    const images = document.querySelectorAll("img");
     images.forEach((img) => {
       if (img.alt?.trim() && img.offsetParent !== null) {
-        // Do not replace the image with alt text, just leave it as an image
+        img.dataset.ttsAltText = img.alt.trim(); // Set alt text as dataset
+        img.dataset.ttsIndex = index++; // Set the data-tts-index for images
+        console.log("Image processed: ", img); // Debug log to check if images are correctly processed
+      }
+  
+      // Check if the image is inside a link
+      if (img.closest("a")) {
+        img.dataset.ttsInLink = true; // Mark if the image is inside a link
       }
     });
-  
-    // Return all visible, readable text from the cleaned-up cloned body
-    return bodyClone.innerText.trim();
   };
   
-  const speakPageContent = (startIndex = 0, content = getPageText(), element = null) => {
+  const speakPageContent = (startIndex = 0, content = getPageText()) => {
     if (!utterance) return;
   
     if (!ttsInitialized) {
-      wrapVisibleTextNodes(); // Initialize text wrapping only once
+      wrapVisibleTextNodes(); // Initialize wrapping once
       ttsInitialized = true;
     }
   
-    const text = content;
-    if (!text) return;
+    if (!content) return;
     console.log("Text TTS will read:\n", content);
   
-    // Split the text into words
-    const words = text.split(/\s+/);
-    const resumedText = words.slice(startIndex).join(" "); // Resume from the correct spot
+    const words = content.split(/\s+/);
+    const resumedText = words.slice(startIndex).join(" ");
   
-    window.speechSynthesis.cancel(); // Stop previous speech
+    window.speechSynthesis.cancel(); // Cancel anything already speaking
   
     utterance.rate = rate;
     utterance.voice = voice;
-    utterance.text = resumedText; // Only the remaining words
-    let spokenWordCount = startIndex;
+    utterance.text = resumedText;
   
+    let localStartIndex = startIndex;
+  
+    // onboundary event handler
     utterance.onboundary = (event) => {
+      console.log("onboundary fired!", event);
+      console.log("Event name:", event.name);
+      console.log("Char index:", event.charIndex);
+      if (altTextQueue.length > 0) {
+        console.log("Alt text is still being spoken, skipping further processing.");
+        return; // Don't proceed with further processing while alt text is being spoken
+      }
+  
+      if (!highlightTTS) {
+        removeHighlights(); // Remove highlights if highlighting is disabled
+        return;
+      }
+  
       if (event.name === "word") {
         const spokenWords = resumedText.slice(0, event.charIndex).split(/\s+/).length;
-        spokenWordCount = startIndex + spokenWords;
+        const nextWordIndex = localStartIndex + spokenWords - 1;
   
-        // Clear previous highlights
-        document.querySelectorAll(".tts-word.tts-highlight").forEach((el) => {
-          el.classList.remove("tts-highlight");
-        });
+        setCurrentIndex(nextWordIndex);
+        removeHighlights(); // Clear previous highlights
   
-        // Find the element corresponding to the current word
-        const currentElement = document.querySelector(`[data-tts-index="${spokenWordCount - 1}"]`);
+        const wordElement = document.querySelector(`[data-tts-index="${nextWordIndex}"]`);
+        const imageElement = document.querySelector(`img[data-tts-index="${nextWordIndex}"]`);
   
-        if (currentElement) {
-          // Only highlight regular words, not alt text
-          if (!currentElement.classList.contains('tts-alt-text')) {
-            currentElement.classList.add("tts-highlight");
+        if (imageElement) {
+          imageElement.classList.add("tts-highlight");
+  
+          const linkElement = imageElement.closest("a");
+          if (linkElement) {
+            linkElement.classList.add("tts-highlight-link");
           }
+  
+          window.speechSynthesis.cancel(); // Cancel previous speech
+  
+          // Add alt text to the queue and speak it
+          altTextQueue.push(imageElement.dataset.ttsAltText);
+          console.log("Queueing alt text for image: ", imageElement.dataset.ttsAltText);
+          isSpeakingAltText = true; // Flag indicating alt text is being spoken
+  
+          // Start speaking the next alt text in the queue
+          speakNextAltText();
+  
+          return; // Stop further processing for the current word and ensure no text is read until alt text is done
+        } else if (wordElement) {
+          wordElement.classList.add("tts-highlight");
         }
       }
     };
   
-    // Start the TTS speech
-    window.speechSynthesis.speak(utterance); // Start speaking
-    setIsSpeaking(true);
-  
+    // onend event handler
     utterance.onend = () => {
-      // Reset highlighting after speech ends
-      document.querySelectorAll(".tts-word.tts-highlight").forEach((el) => {
-        el.classList.remove("tts-highlight");
-      });
-  
-      document.querySelectorAll(".highlight-element").forEach((el) => {
-        el.classList.remove("highlight-element");
-      });
-  
+      removeHighlights(); // Remove all highlights when TTS ends
       setIsSpeaking(false);
-      setCurrentIndex(null); // Reset index for future plays
+      setCurrentIndex(null);
     };
+  
+    // Start speaking the text
+    window.speechSynthesis.speak(utterance);
+    setIsSpeaking(true);
   };
+
+  // Function to speak the next alt text in the queue
+  const speakNextAltText = (resumeIndex) => {
+    if (altTextQueue.length === 0) {
+      isSpeakingAltText = false; // Reset the flag
+      speakPageContent(resumeIndex); // <<< Resume reading the page from the correct index
+      return;
+    }
   
-  
-  
+    const altText = altTextQueue.shift(); // Get next alt text
+    speakText(altText, () => {
+      console.log("Finished speaking alt text: ", altText);
+      speakNextAltText(resumeIndex); // Pass resumeIndex down so you can continue when all alt texts are spoken
+    });
+  };
 
   // Speak function for quick content
-  const speakText = (text) => {
-    if (!utterance || !text) return;  
+  const speakText = (text, callback = null) => {
+    if (!text) return;
 
-    window.speechSynthesis.cancel();    // Stop anything already speaking
+    const tempUtterance = new SpeechSynthesisUtterance(text);
+    tempUtterance.voice = voice;
+    tempUtterance.rate = rate;
 
-    utterance.text = text;
-    utterance.voice = voice;
-    utterance.rate = rate;
+    tempUtterance.onend = () => {
+      if (callback) callback(); // Call the callback after speaking
+      setIsSpeaking(false);
+    };
 
-    window.speechSynthesis.speak(utterance); // Start speaking
+    window.speechSynthesis.speak(tempUtterance);
     setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-  }
+  };
 
   // Resume function
   const resumeSpeaking = () => {
@@ -355,7 +414,7 @@ export const TTSProvider = ({ children }) => {
   return (
     <TTSContext.Provider value={{ getPageText, speakPageContent, resumeSpeaking, stopSpeaking, isSpeaking, currentIndex,
        rate, setRate, voice, setVoice, voices, setVoices, speakText, clickTTS, setClickTTS, ttsAnnouncement, setTTSAnnouncement,
-       highlightTTS, setHighlightTTS, saveTTSSettings }}>
+       highlightTTS, setHighlightTTS, saveTTSSettings, removeHighlights }}>
       {children}
     </TTSContext.Provider>
   );
