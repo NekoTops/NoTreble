@@ -38,7 +38,7 @@ export default function MusicPlayer({ params }) {
         .then(setXmlData)
         .catch(console.error);
     }
-  }, [uid, filename, userId]);
+  }, [filename, userId]);
 
   useEffect(() => {
     if (xmlData && osmdContainerRef.current) {
@@ -54,6 +54,7 @@ export default function MusicPlayer({ params }) {
 
       osmd.load(xmlData).then(() => {
         osmd.Sheet.Title.text = cleanTitle;
+
         osmd.render();         
         osmdRef.current = osmd;
 
