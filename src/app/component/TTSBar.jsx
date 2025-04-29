@@ -1,40 +1,32 @@
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import { FaCirclePause } from "react-icons/fa6";
 import { FaCirclePlay } from "react-icons/fa6";
 import { HiMiniSpeakerWave } from "react-icons/hi2";
-import { useHotkeys } from "react-hotkeys-hook";
-import { useTTS } from "../context/TTSContext";
+import { useHotkeys } from 'react-hotkeys-hook'
+import { useTTS } from "../context/TTSContext"; // Import TTS functions
 
 export default function TTSBar() {
-  const [buttonClicked, setButtonClicked] = useState(false);
+  const [buttonClicked, setButtonClicked] = useState(false); // State to track if the button is clicked
   const [isHovered, setIsHovered] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
-  const [textSize, setTextSize] = useState("medium");  // <-- Add local textSize here
-
-  const { 
-    speakPageContent, speakText, stopSpeaking, isSpeaking,
-    currentIndex, resumeSpeaking, rate, setRate,
-    voice, setVoice, voices, setVoices,
-    ttsAnnouncement, setTTSAnnouncement 
-  } = useTTS();
-
+  const [showOptions, setShowOptions] = useState(false);  // State for the expanding button   
+  const { speakPageContent, speakText, stopSpeaking, isSpeaking, currentIndex, resumeSpeaking, rate, setRate, voice, setVoice, voices, setVoices, ttsAnnouncement, setTTSAnnouncement } = useTTS(); // Use the TTS context
   const menuRef = useRef();
-
+    
   useEffect(() => {
+    // Ensure the voices are populated from the SpeechSynthesis API
     const allVoices = window.speechSynthesis.getVoices();
-    setVoices(allVoices);
+    setVoices(allVoices); // Set the available voices in the TTS context
   }, []);
 
-  useEffect(() => {
+  useEffect(() =>{
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setShowOptions(false);
       }
-    };
+    }
 
-    if (showOptions) {
+    if (showOptions){
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
@@ -42,73 +34,74 @@ export default function TTSBar() {
     };
   }, [showOptions]);
 
+  // Bind play/pause button with space bar
   useHotkeys("space", (e) => {
-    e.preventDefault();
+    e.preventDefault()   // Stop spacebar from scrolling
     handleTTS(e);
   });
 
   const handleTTS = (e) => {
-    e.stopPropagation();
+    const target = e.target
+
+    e.stopPropagation();    // stop the event bubbling
     setButtonClicked(!buttonClicked);
     if (isSpeaking) {
-      stopSpeaking();
+      stopSpeaking();  // Stop speech if currently speaking
     } else {
+      // Start from the beginning, or resume from the last word
       if (currentIndex !== null) {
-        resumeSpeaking();
+        resumeSpeaking(); // Resume if we have a current index
       } else {
-        speakPageContent();
+        speakPageContent(); // Start speaking if no previous index
       }
     }
   };
 
   const handleRate = (e) => {
+    // Stop speaking when user chooses a new rate
     stopSpeaking();
     const newRate = parseFloat(e.target.value);
     setRate(newRate);
-    speakText(`Speed: ${newRate}`);
+    speakText(`Speed: ${newRate}`);  // Inform the user the change in tts speed
   };
 
   const handleExpand = () => {
-    setShowOptions((prev) => !prev);
+    setShowOptions(prev => !prev);
   };
-
+  
+  // Get the first 3 voices from the available voices list
   const filteredVoices = voices.slice(0, 3);
 
   const handleVoiceChange = (e) => {
     stopSpeaking();
     const selectedVoice = filteredVoices.find((v) => v.name === e.target.value);
-    setVoice(selectedVoice);
-    speakText(`Voice: ${e.target.selectedOptions[0].text}`);
+    console.log("voice:", selectedVoice)
+    setVoice(selectedVoice); // Update the voice in the TTS context
+    speakText(`Voice: ${e.target.selectedOptions[0].text}`);  // Inform the user the change in tts voice
   };
 
   const handleAnnouncement = (e) => {
     setTTSAnnouncement(e.target.checked);
-    const choice = e.target.checked ? "on" : "off";
-    speakText(`Announce Page ${choice}`);
-  };
+    
+    let choice = "";
 
-  const handleTextSizeChange = (e) => {
-    const newSize = e.target.value;
-    setTextSize(newSize);
-
-    // Remove both classes first to prevent conflict
-    document.body.classList.remove("large-text-size", "medium-text-size");
-
-    // Add the selected class
-    if (newSize === "large") {
-      document.body.classList.add("large-text-size");
-    } else if (newSize === "medium") {
-      document.body.classList.add("medium-text-size");
+    if (e.target.checked) {
+      choice = "on";
+    }
+    else {
+      choice = "off";
     }
 
-    speakText(`Text size set to ${newSize}`);
-  };
+    speakText(`Announce Page ${choice}`)
+  }
+
 
   return (
     <div
       style={{ position: "fixed", bottom: "10px", right: "20px", zIndex: 1000 }}
     >
       <div style={{ position: "relative" }} ref={menuRef}>
+        {/* Speaker button (only toggles dropdown) */}
         <button
           data-ignore-tts
           onClick={(e) => {
@@ -116,15 +109,17 @@ export default function TTSBar() {
             handleExpand();
           }}
         >
-          <HiMiniSpeakerWave size={70} data-ignore-tts className="hover:scale-125" />
+          <HiMiniSpeakerWave size={70} data-ignore-tts className= "hover:scale-125" />
         </button>
 
+        {/* Dropdown Options */}
         {showOptions && (
           <div
             className="absolute bottom-12 right-0 bg-[#f5f5f5] border rounded-xl p-3 transition-all duration-300 ease-in-out"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()} // Prevent dropdown clicks from closing the menu
           >
             <div className="flex items-center">
+              {/* Play / Pause button */}
               <div
                 className="mr-5 transition-transform transform hover:scale-125 cursor-pointer"
                 onClick={(e) => {
@@ -139,6 +134,7 @@ export default function TTSBar() {
                 )}
               </div>
 
+              {/* Speed Dropdown */}
               <div className="mr-5 text-body">
                 <label>Speed</label>
                 <select
@@ -159,7 +155,8 @@ export default function TTSBar() {
                 </select>
               </div>
 
-              <div className="mr-5 text-body">
+              {/* Voice Dropdown */}
+              <div className="text-body">
                 <label>Voice</label>
                 <select
                   className="bg-gray-300 shadow"
@@ -175,35 +172,19 @@ export default function TTSBar() {
                   ))}
                 </select>
               </div>
-
-              <div className="text-body">
-                <label>Text Size</label>
-                <select
-                  className="bg-gray-300 shadow"
-                  value={textSize}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleTextSizeChange(e);
-                  }}
-                  title={`Text Size: ${textSize}`}
-                >
-                  <option value="medium">Medium</option>
-                  <option value="large">Large</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <input 
-                type="checkbox"
-                id="announcementToggle"
-                checked={ttsAnnouncement}
-                onChange={(e) => handleAnnouncement(e)}
-                className="tts-announcement w-6 h-6 m-4"
-              />
-              <label htmlFor="announcementToggle" className="text-body">Announce page</label>
-            </div>
           </div>
+          {/* Option to toggle the page announcement*/}
+          <div>
+            <input 
+              type="checkbox"
+              id="announcementToggle"
+              checked={ttsAnnouncement}
+              onChange={(e) => handleAnnouncement(e)}
+              className="tts-announcement w-6 h-6 m-4"
+            />
+            <label htmlFor="announcementToggle" className="text-body">Announce page</label>
+          </div>
+        </div>
         )}
       </div>
     </div>
