@@ -922,7 +922,7 @@ if (el) {
     }
   }}
   disabled={isPlaying && !isPaused}
-  className={`ml-2 px-4 py-1 rounded transition ${
+  className={` ml-2 px-4 py-1 rounded transition ${
     isPlaying && !isPaused
       ? "bg-blue-300 text-white cursor-not-allowed"
       : "bg-blue-600 hover:bg-blue-700 text-white"
