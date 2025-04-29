@@ -57,13 +57,6 @@ Music Theory lessons presented in this project was made by the authors of [`Open
 - Speech Synthesis
 - VexFlow
 - OpenSheetMusicDisplay
-## Living UML Diagrams
-### Web Architecture
-![Website Architecture Diagram](https://github.com/user-attachments/assets/c808dca1-3272-4f4b-afd5-2c7602e59ff5)
-### Post Sequence
-![Sequence diagram for creating a post](https://github.com/user-attachments/assets/408f2296-88ea-4d53-a86f-24c5d5cc4391)
-### Sheet Music Tool Conversion process
-![Sheet Music Tools Converter State Diagram](https://github.com/user-attachments/assets/665049be-9c58-429d-a966-60558ec9c820)
 ## Team Bryte
 - Joshua Yao | Scrum master | Front End | Back End
 - Jade Mitchell | Front End
