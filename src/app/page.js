@@ -39,7 +39,7 @@ export default function Home() {
           className="absolute top-0 left-0 w-full h-full object-cover opacity-20 z-0"
         >
           <source src="/piano.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
+          
         </video>
 
         {/* Welcome Content */}
@@ -52,7 +52,7 @@ export default function Home() {
               </p>
               <p className="italic text-[#2a325e]">Press CTRL + (→) to go Next page</p>
               <p className="italic text-[#2a325e]">Press CTRL + (←) to go Previous Page</p>
-              <p className="italic text-[#2a325e]">Press SPACE to toggle TTS</p>
+              <p className="italic text-[#2a325e]">Press SPACE to toggle TTS.</p>
               {target === "/Login" ? (
                 <NavLink
                   href="/Signup"
