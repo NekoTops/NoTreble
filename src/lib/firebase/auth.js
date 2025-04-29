@@ -91,7 +91,7 @@ const getUserProfile = async (uid) => {
         createdAt: new Date(),
       };
 
-      await setDoc(userDocRef, newUserProfile);
+      await setDoc(userDocRef, newUserProfile, {merge: true});
       return newUserProfile;
     }
   } catch (error) {
