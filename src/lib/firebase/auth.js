@@ -23,6 +23,7 @@ const signUp = async (email, password, username, profilePic) => {
       speed: 1,
       voice: "Google US English",
       announcement: true,
+      highlightTTS: true,
       createdAt: new Date(),
     });
 
@@ -91,7 +92,7 @@ const getUserProfile = async (uid) => {
         createdAt: new Date(),
       };
 
-      await setDoc(userDocRef, newUserProfile);
+      await setDoc(userDocRef, newUserProfile, {merge: true});
       return newUserProfile;
     }
   } catch (error) {
