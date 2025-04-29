@@ -626,50 +626,58 @@ export default function Reference(){
         }
     }
     return (
-        <div
-          className="min-h-screen w-full flex items-center justify-center p-8"
-          style={{
-            background: "linear-gradient(to bottom, white, #4b5583)", // same as Lessons page
-            paddingBottom: "2rem", // match your Lessons page's bottom padding too
-          }}
-        >
-          <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-6xl">
-            <div className="reference-title">
-            <h1
-            className="text-center font-bold"
+        <>
+          {/* Add manual top border if necessary */}
+          <div className="w-full h-px bg-gray-500"></div> 
+      
+          <div
+            className="min-h-screen w-full flex items-center justify-center p-8"
             style={{
-              fontSize: "calc(var(--h3-text-size) + 8px)",
+              background: "linear-gradient(to bottom, white, #4b5583)",
+              paddingBottom: "2rem",
             }}
           >
-            Reference Guide
-          </h1>
-              <div className="term-search">
-                <input
-                  type="text"
-                  placeholder="Search Terms..."
-                  onChange={(a) => {
-                    const query = a.target.value.toLowerCase();
-                    const filtered = terms.filter((term) =>
-                      term.term.toLowerCase().includes(query) ||
-                      term.group.toLowerCase().includes(query) ||
-                      term.definition.toLowerCase().includes(query)
-                    );
-                    setFilteredTerms(filtered);
-                    if (filtered.length === 0 && query.length > 0) {
-                      setnoMatch(1);
-                    } else {
-                      setnoMatch(0);
-                    }
+            <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-6xl">
+              <div className="reference-title">
+                <h1
+                  className="text-center font-bold"
+                  style={{
+                    fontSize: "calc(var(--h3-text-size) + 8px)",
                   }}
-                />
+                >
+                  Reference Guide
+                </h1>
+      
+                <div className="term-search">
+                  <input
+                    type="text"
+                    placeholder="Search Terms..."
+                    onChange={(a) => {
+                      const query = a.target.value.toLowerCase();
+                      const filtered = terms.filter((term) =>
+                        term.term.toLowerCase().includes(query) ||
+                        term.group.toLowerCase().includes(query) ||
+                        term.definition.toLowerCase().includes(query)
+                      );
+                      setFilteredTerms(filtered);
+                      if (filtered.length === 0 && query.length > 0) {
+                        setnoMatch(1);
+                      } else {
+                        setnoMatch(0);
+                      }
+                    }}
+                  />
+                </div>
+      
+                <div className="sort-buttons">
+                  <button onClick={() => setSort(1)}>Sort by Category</button>
+                  <button onClick={() => setSort(2)}>Sort Alphabetically</button>
+                </div>
+      
+                {renderSort()}
               </div>
-              <div className="sort-buttons">
-                <button onClick={() => setSort(1)}>Sort by Category</button>
-                <button onClick={() => setSort(2)}>Sort Alphabetically</button>
-              </div>
-              {renderSort()}
-            </div> {/* Close white box */}
-          </div> {/* Close gray background */}
-        </div> // Properly closed everything now
+            </div>
+          </div>
+        </>
       );
     }      
