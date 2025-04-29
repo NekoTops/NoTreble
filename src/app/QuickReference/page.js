@@ -635,7 +635,14 @@ export default function Reference(){
         >
           <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-6xl">
             <div className="reference-title">
-              <h2>Reference Guide</h2>
+            <h1
+            className="text-center font-bold"
+            style={{
+              fontSize: "calc(var(--h3-text-size) + 8px)",
+            }}
+          >
+            Reference Guide
+          </h1>
               <div className="term-search">
                 <input
                   type="text"

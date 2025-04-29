@@ -213,7 +213,16 @@ const removeTag = (tagToRemove) => {
         paddingBottom: "2rem",
       }}
     >  
-      <h1 className="text-center font-bold mt-40 mb-10 text-h3">Community Posts</h1>
+    <div className="flex justify-center mt-8">
+                <h1
+            className="text-center font-bold"
+            style={{
+              fontSize: "calc(var(--h3-text-size) + 8px)",
+            }}
+          >
+            Community Posts
+          </h1>
+          </div>
       <div className="container mx-auto bg-gray-200 rounded-2xl text-body p-8">
         {user && (
           <div className="flex justify-center mb-4">

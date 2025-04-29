@@ -49,6 +49,7 @@ export default function Lessons() {
     >
       {/* Title Box */}
       <div className="flex justify-center mt-8">
+        
           <h1
             className="text-center font-bold"
             style={{

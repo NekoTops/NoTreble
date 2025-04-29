@@ -110,8 +110,9 @@ export default function SheetMusicTools() {
   
   return (
     <main className="min-h-screen p-6" style={{ background: "linear-gradient(to bottom, white, #4b5583)" }}>
+      <div className="flex justify-center mt-8">
       <h1 className="font-bold mb-7 text-h3 text-center">Sheet Music Converter</h1>
-
+      </div>
       <div className="flex flex-col lg:flex-row gap-8 bg-gray-200 p-8 rounded-2xl border-2 border-gray-400 max-w-6xl mx-auto">
         {/* LEFT: Upload + Form + Buttons */}
         <div className="w-full lg:w-5/12 flex flex-col gap-6">
