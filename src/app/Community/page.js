@@ -206,7 +206,13 @@ const removeTag = (tagToRemove) => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <main>
+    <main
+      className="min-h-screen"
+      style={{
+        background: "linear-gradient(to bottom, white, #4b5583)",
+        paddingBottom: "2rem",
+      }}
+    >  
       <h1 className="text-center font-bold mt-40 mb-10 text-h3">Community Posts</h1>
       <div className="container mx-auto bg-gray-200 rounded-2xl text-body p-8">
         {user && (

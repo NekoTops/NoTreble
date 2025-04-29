@@ -626,31 +626,43 @@ export default function Reference(){
         }
     }
     return (
-        //sort buttons set sort to the appropriate value and changes the state
-        <div className="reference-title">
-            <h2>Reference Guide</h2>
-            <div className="term-search">
+        <div
+          className="min-h-screen w-full flex items-center justify-center p-8"
+          style={{
+            background: "linear-gradient(to bottom, white, #4b5583)", // same as Lessons page
+            paddingBottom: "2rem", // match your Lessons page's bottom padding too
+          }}
+        >
+          <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-6xl">
+            <div className="reference-title">
+              <h2>Reference Guide</h2>
+              <div className="term-search">
                 <input
-                    type="text"
-                    placeholder="Search Terms..."
-                    onChange={(a) => {
-                        const query = a.target.value.toLowerCase();
-                        setFilteredTerms(terms.filter((term) => term.term.toLowerCase().includes(query) || term.group.toLowerCase().includes(query) || term.definition.toLowerCase().includes(query)));
-                        //If there are no terms that match the search, set noMatch to 1, else set it to 0
-                        //Used to render the "no terms found" message
-                        if (filteredTerms.length == 0 && query.length > 0) {
-                            setnoMatch(1);
-                        } else {
-                            setnoMatch(0);
-                        }
-                    }}
+                  type="text"
+                  placeholder="Search Terms..."
+                  onChange={(a) => {
+                    const query = a.target.value.toLowerCase();
+                    const filtered = terms.filter((term) =>
+                      term.term.toLowerCase().includes(query) ||
+                      term.group.toLowerCase().includes(query) ||
+                      term.definition.toLowerCase().includes(query)
+                    );
+                    setFilteredTerms(filtered);
+                    if (filtered.length === 0 && query.length > 0) {
+                      setnoMatch(1);
+                    } else {
+                      setnoMatch(0);
+                    }
+                  }}
                 />
-            </div>
-            <div className="sort-buttons">
-            <button onClick={() => setSort(1)}>Sort by Category</button>
-            <button onClick={() => setSort(2)}>Sort Alphabetically</button>
-            </div>
-            {renderSort()}
-        </div>
-    );
-}
+              </div>
+              <div className="sort-buttons">
+                <button onClick={() => setSort(1)}>Sort by Category</button>
+                <button onClick={() => setSort(2)}>Sort Alphabetically</button>
+              </div>
+              {renderSort()}
+            </div> {/* Close white box */}
+          </div> {/* Close gray background */}
+        </div> // Properly closed everything now
+      );
+    }      
